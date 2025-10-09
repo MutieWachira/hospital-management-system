@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard - HMS</title>
+  <link rel="stylesheet" href="css/index.css" />
+</head>
+<body>
+  <div class="admin-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <h2>HMS Admin</h2>
+      <ul>
+        <li><a href="admin-dashboard.html" class="active">🏠 Dashboard</a></li>
+        <li><a href="doctor.html">👨‍⚕️ Doctors</a></li>
+        <li><a href="patients.html">🧑‍🤝‍🧑 Patients</a></li>
+        <li><a href="appointments.html">📅 Appointments</a></li>
+      </ul>
+      <button id="logoutBtn">Logout</button>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="dashboard">
+      <header>
+        <h1>Admin Dashboard</h1>
+      </header>
+
+      <section class="stats">
+        <div class="card">
+          <h3>Doctors</h3>
+          <p id="doctorCount">0</p>
+        </div>
+        <div class="card">
+          <h3>Patients</h3>
+          <p id="patientCount">0</p>
+        </div>
+        <div class="card">
+          <h3>Appointments</h3>
+          <p id="appointmentCount">0</p>
+        </div>
+        <div class="card">
+          <h3>Departments</h3>
+          <p id="appointmentCount">0</p>
+        </div>
+        
+      </section>
+
+      <section class="recent-activity">
+        <h2>Recent Activity</h2>
+        <ul id="recentList">
+          <li>System initialized...</li>
+        </ul>
+      </section>
+    </main>
+  </div>
+
+  <script src="../app.js"></script>
+  <script src="admin.js"></script>
+</body>
+</html>
