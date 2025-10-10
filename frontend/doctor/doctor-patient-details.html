@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>View Patient - Doctor Panel</title>
+  <link rel="stylesheet" href="css/doctor-patient-details.css" />
+</head>
+<body>
+  <div class="container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <h2>Doctor Panel</h2>
+      <ul>
+      <li><a href="doctor-dashboard.html" class="active">Dashboard</a></li>
+      <li><a href="doctor-patients.html">My Patients</a></li>
+      <li><a href="doctor-appointments.html">My Appointments</a></li>
+      <li><a href="doctor-profile.html">Profile</a></li>
+    </ul>
+    </aside>
+
+    <!-- Main -->
+    <main class="content">
+      <header class="patient-header">
+        <img src="../assets/patient-avatar.png" alt="Patient" class="avatar" />
+        <div>
+          <h1 id="patientName">John Doe</h1>
+          <p>ID: <span id="patientID">P12345</span></p>
+          <p>Blood Group: <span id="bloodGroup">O+</span></p>
+        </div>
+      </header>
+
+      <!-- Personal Info -->
+      <section class="patient-info">
+        <h2>Personal Information</h2>
+        <p>Age: <span id="patientAge">30</span></p>
+        <p>Gender: <span id="gender">Male</span></p>
+        <p>Phone: <span id="phone">+254 712 345 678</span></p>
+        <p>Address: <span id="address">Nairobi, Kenya</span></p>
+      </section>
+
+      <!-- Medical Records -->
+      <section class="medical-records">
+        <h2>Medical Records</h2>
+        <table>
+          <thead>
+            <tr><th>Date</th><th>Diagnosis</th><th>Treatment</th><th>Doctor Notes</th></tr>
+          </thead>
+          <tbody id="recordsTable">
+            <tr><td>2025-10-01</td><td>Flu</td><td>Rest & antibiotics</td><td>Improving</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Add Record -->
+      <section class="add-record">
+        <h2>Add New Medical Record</h2>
+        <form id="recordForm">
+          <input type="date" id="recordDate" required />
+          <input type="text" id="diagnosis" placeholder="Diagnosis" required />
+          <input type="text" id="treatment" placeholder="Treatment" required />
+          <input type="text" id="doctorNotes" placeholder="Doctor Notes" required />
+          <button type="submit">Add Record</button>
+        </form>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    // Same logic structure from admin modules
+    const form = document.getElementById("recordForm");
+    const table = document.getElementById("recordsTable");
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      const date = document.getElementById("recordDate").value;
+      const diagnosis = document.getElementById("diagnosis").value;
+      const treatment = document.getElementById("treatment").value;
+      const notes = document.getElementById("doctorNotes").value;
+
+      const newRow = document.createElement("tr");
+      newRow.innerHTML = `
+        <td>${date}</td>
+        <td>${diagnosis}</td>
+        <td>${treatment}</td>
+        <td>${notes}</td>
+      `;
+      table.appendChild(newRow);
+
+      form.reset();
+      alert("New medical record added successfully!");
+    });
+  </script>
+</body>
+</html>

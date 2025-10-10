@@ -1,0 +1,200 @@
+/* ===== Reset & Base Styles ===== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  display: flex;
+  min-height: 100vh;
+  background: #f8fafc;
+  color: #333;
+}
+.container {
+    display: flex;
+    width: 100%;
+}
+
+/* ===== Sidebar ===== */
+.sidebar {
+  width: 240px;
+  background: linear-gradient(180deg, #1e3a8a, #3b82f6);
+  color: #fff;
+  padding: 25px 15px;
+  position: fixed;
+  height: 100vh;
+}
+
+.sidebar h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.sidebar ul {
+  list-style: none;
+}
+
+.sidebar ul li {
+  margin: 15px 0;
+}
+
+.sidebar ul li a {
+  color: white;
+  text-decoration: none;
+  display: block;
+  padding: 10px 15px;
+  border-radius: 6px;
+  transition: background 0.3s, transform 0.2s;
+}
+
+.sidebar ul li a:hover,
+.sidebar ul li a.active {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateX(4px);
+}
+
+/* ===== Main Content ===== */
+.content {
+  flex: 1;
+  margin-left: 240px;
+  padding: 30px;
+}
+
+.topbar {
+  margin-bottom: 20px;
+}
+
+h1 {
+  font-size: 24px;
+  color: #1e3a8a;
+}
+
+h2 {
+  color: #1e40af;
+  margin-bottom: 10px;
+}
+
+/* ===== Info Card ===== */
+.info-card {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 25px;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+}
+
+/* ===== Tables ===== */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  background: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+th, td {
+  padding: 12px;
+  border-bottom: 1px solid #ddd;
+  text-align: left;
+}
+
+.status {
+  padding: 5px 10px;
+  border-radius: 5px;
+  font-weight: 600;
+}
+
+.status.pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.status.completed {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+/* ===== Notes Section ===== */
+.doctor-notes {
+  background: #fff;
+  padding: 20px;
+  margin-top: 25px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.doctor-notes textarea {
+  width: 100%;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 10px;
+  margin-bottom: 10px;
+  resize: none;
+}
+
+.doctor-notes button {
+  background: #2563eb;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.doctor-notes button:hover {
+  background: #1e40af;
+}
+
+/* ===== Back Button ===== */
+.back-button {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.back-link {
+  text-decoration: none;
+  color: #1e3a8a;
+  font-weight: 600;
+  transition: color 0.3s;
+}
+
+.back-link:hover {
+  color: #2563eb;
+}
+
+/* ===== Responsive Design ===== */
+@media (max-width: 768px) {
+  body {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+  }
+
+  .content {
+    margin-left: 0;
+    padding: 15px;
+  }
+
+  table {
+    font-size: 14px;
+  }
+
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+}

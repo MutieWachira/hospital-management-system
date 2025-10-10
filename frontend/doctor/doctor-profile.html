@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Doctor Profile - HMS</title>
+  <link rel="stylesheet" href="css/doctor-profile.css" />
+</head>
+<body>
+  <div class="container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <h2>Doctor Panel</h2>
+      <ul>
+      <li><a href="doctor-dashboard.html" class="active">Dashboard</a></li>
+      <li><a href="doctor-patients.html">My Patients</a></li>
+      <li><a href="doctor-appointments.html">My Appointments</a></li>
+      <li><a href="doctor-profile.html">Profile</a></li>
+    </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="content">
+      <header class="topbar">
+        <h1>My Profile</h1>
+      </header>
+
+      <!-- Profile Overview -->
+      <section class="profile-overview">
+        <div class="profile-header">
+          <img src="../assets/doctor-avatar.png" alt="Doctor" class="avatar" />
+          <div>
+            <h2 id="doctorName">Dr. Alice Smith</h2>
+            <p><strong>Specialization:</strong> Cardiology</p>
+            <p><strong>Email:</strong> alice.smith@hospital.com</p>
+            <p><strong>Phone:</strong> +254 700 555 888</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Editable Profile Info -->
+      <section class="profile-info">
+        <h2>Edit Profile Information</h2>
+        <form id="profileForm">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="name">Full Name</label>
+              <input type="text" id="name" value="Dr. Alice Smith" required />
+            </div>
+
+            <div class="form-group">
+              <label for="email">Email</label>
+              <input type="email" id="email" value="alice.smith@hospital.com" required />
+            </div>
+
+            <div class="form-group">
+              <label for="phone">Phone</label>
+              <input type="text" id="phone" value="+254 700 555 888" required />
+            </div>
+
+            <div class="form-group">
+              <label for="specialization">Specialization</label>
+              <input type="text" id="specialization" value="Cardiology" required />
+            </div>
+
+            <div class="form-group">
+              <label for="schedule">Work Schedule</label>
+              <input type="text" id="schedule" value="Mon - Fri, 9:00 AM - 4:00 PM" required />
+            </div>
+          </div>
+
+          <button type="submit">Save Changes</button>
+        </form>
+      </section>
+
+      <!-- Change Password -->
+      <section class="change-password">
+        <h2>Change Password</h2>
+        <form id="passwordForm">
+          <div class="form-group">
+            <label for="currentPassword">Current Password</label>
+            <input type="password" id="currentPassword" required />
+          </div>
+
+          <div class="form-group">
+            <label for="newPassword">New Password</label>
+            <input type="password" id="newPassword" required />
+          </div>
+
+          <div class="form-group">
+            <label for="confirmPassword">Confirm New Password</label>
+            <input type="password" id="confirmPassword" required />
+          </div>
+
+          <button type="submit">Update Password</button>
+        </form>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    // Save Profile Changes
+    document.getElementById("profileForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      alert("Profile information updated successfully!");
+    });
+
+    // Change Password
+    document.getElementById("passwordForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const newPass = document.getElementById("newPassword").value;
+      const confirmPass = document.getElementById("confirmPassword").value;
+
+      if (newPass !== confirmPass) {
+        alert("New passwords do not match!");
+        return;
+      }
+
+      alert("Password changed successfully!");
+      this.reset();
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,178 @@
+/* ===== Global Reset ===== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  display: flex;
+  min-height: 100vh;
+  background: #f4f6f8;
+  color: #333;
+}
+.container{
+    display: flex;
+    width: 100%;
+}
+
+/* ===== Sidebar ===== */
+.sidebar {
+  width: 240px;
+  background: linear-gradient(180deg, #1e3a8a, #3b82f6);
+  color: white;
+  padding: 25px 15px;
+  height: 100vh;
+  position: fixed;
+}
+
+.sidebar h2 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.sidebar ul {
+  list-style: none;
+}
+
+.sidebar ul li {
+  margin: 15px 0;
+}
+
+.sidebar ul li a {
+  color: white;
+  text-decoration: none;
+  display: block;
+  padding: 10px 15px;
+  border-radius: 6px;
+  transition: background 0.3s, transform 0.2s;
+}
+
+.sidebar ul li a:hover,
+.sidebar ul li a.active {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateX(4px);
+}
+
+/* ===== Content ===== */
+.content {
+  flex: 1;
+  margin-left: 240px;
+  padding: 30px;
+}
+
+.topbar {
+  margin-bottom: 20px;
+}
+
+h1 {
+  font-size: 24px;
+  color: #1e3a8a;
+}
+
+.appointments-section {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  padding: 12px;
+  border-bottom: 1px solid #ddd;
+  text-align: left;
+}
+
+.status {
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.status.pending { background: #fef3c7; color: #92400e; }
+.status.completed { background: #d1fae5; color: #065f46; }
+.status.cancelled { background: #fee2e2; color: #991b1b; }
+
+button {
+  border: none;
+  padding: 8px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.complete-btn { background: #10b981; color: white; }
+.cancel-btn { background: #ef4444; color: white; }
+.view-btn { background: #3b82f6; color: white; }
+
+button:hover {
+  opacity: 0.9;
+}
+
+/* ===== Add Notes Section ===== */
+.add-notes {
+  background: white;
+  margin-top: 30px;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.add-notes form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.add-notes input, .add-notes textarea {
+  flex: 1 1 45%;
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+.add-notes button {
+  background: #2563eb;
+  color: white;
+  padding: 10px 15px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+}
+
+.add-notes button:hover {
+  background: #1e40af;
+}
+
+/* ===== Responsive Design ===== */
+@media (max-width: 768px) {
+  body {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    position: relative;
+    width: 100%;
+    height: auto;
+  }
+
+  .content {
+    margin-left: 0;
+    padding: 15px;
+  }
+
+  .add-notes form {
+    flex-direction: column;
+  }
+
+  .add-notes input, .add-notes textarea {
+    flex: 1 1 100%;
+  }
+}

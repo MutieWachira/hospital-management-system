@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Patients - Doctor Portal</title>
+  <link rel="stylesheet" href="css/doctor-patients.css">
+</head>
+<body>
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <h2>Doctor Portal</h2>
+    <ul>
+      <li><a href="doctor-dashboard.html" class="active">Dashboard</a></li>
+      <li><a href="doctor-patients.html">My Patients</a></li>
+      <li><a href="doctor-appointments.html">My Appointments</a></li>
+      <li><a href="doctor-profile.html">Profile</a></li>
+    </ul>
+  </aside>
+
+  <!-- Main Section -->
+  <main class="main">
+    <div class="topbar">
+      <h2>My Patients</h2>
+      <input type="text" placeholder="Search patients..." class="search-box">
+    </div>
+
+    <section class="patients-section">
+      <table>
+        <thead>
+          <tr>
+            <th>Patient ID</th>
+            <th>Name</th>
+            <th>Age</th>
+            <th>Gender</th>
+            <th>Condition</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>P001</td>
+            <td>John Doe</td>
+            <td>35</td>
+            <td>Male</td>
+            <td>Diabetes</td>
+            <td><span class="status stable">Stable</span></td>
+            <td><button class="view-btn"><a href="doctor-patient-details.html">View</a></button></td>
+          </tr>
+          <tr>
+            <td>P002</td>
+            <td>Mary Wanjiku</td>
+            <td>29</td>
+            <td>Female</td>
+            <td>Asthma</td>
+            <td><span class="status critical">Critical</span></td>
+            <td><button class="view-btn">View</button></td>
+          </tr>
+          <tr>
+            <td>P003</td>
+            <td>Peter Otieno</td>
+            <td>42</td>
+            <td>Male</td>
+            <td>Hypertension</td>
+            <td><span class="status recovering">Recovering</span></td>
+            <td><button class="view-btn">View</button></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </main>
+</body>
+</html>
