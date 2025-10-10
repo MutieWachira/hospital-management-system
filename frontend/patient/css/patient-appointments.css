@@ -1,0 +1,161 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  display: flex;
+  background-color: #f4f6f8;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 240px;
+  background-color: #2d5be3;
+  color: white;
+  padding: 20px;
+}
+
+.sidebar h2 {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.sidebar ul {
+  list-style: none;
+}
+
+.sidebar ul li {
+  margin: 20px 0;
+}
+
+.sidebar ul li a {
+  color: white;
+  text-decoration: none;
+  display: block;
+  padding: 10px 15px;
+  border-radius: 8px;
+  transition: background 0.3s;
+}
+
+.sidebar ul li a:hover,
+.sidebar ul li a.active {
+  background-color: #1c3e9e;
+}
+
+.main-content {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+header h1 {
+  color: #2d5be3;
+}
+
+.new-btn {
+  background-color: #2d5be3;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.new-btn:hover {
+  background-color: #1c3e9e;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+thead {
+  background-color: #2d5be3;
+  color: white;
+}
+
+th, td {
+  padding: 12px 15px;
+  text-align: left;
+}
+
+tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.status {
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: bold;
+}
+
+.status.upcoming {
+  background-color: #e0f3ff;
+  color: #2d5be3;
+}
+
+.status.completed {
+  background-color: #e0ffe6;
+  color: #1b8a2c;
+}
+
+.cancel-btn, .view-btn {
+  padding: 6px 10px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  color: white;
+}
+
+.cancel-btn {
+  background-color: #e33d3d;
+}
+
+.cancel-btn:hover {
+  background-color: #b32a2a;
+}
+
+.view-btn {
+  background-color: #2d5be3;
+}
+
+.view-btn:hover {
+  background-color: #1c3e9e;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .sidebar {
+    display: none;
+  }
+
+  header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  table {
+    font-size: 0.85rem;
+  }
+
+  th, td {
+    padding: 8px;
+  }
+}

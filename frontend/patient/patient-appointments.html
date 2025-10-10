@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Appointments | HMS Patient</title>
+  <link rel="stylesheet" href="css/patient-appointments.css" />
+</head>
+<body>
+  <div class="sidebar">
+    <h2>HMS Patient</h2>
+    <ul>
+      <li><a href="patient-dashboard.html">Dashboard</a></li>
+      <li><a href="patient-appointments.html" class="active">My Appointments</a></li>
+      <li><a href="patient-ai-checker.html">AI Symptom Checker</a></li>
+      <li><a href="patient-records.html">Medical Records</a></li>
+      <li><a href="patient-profile.html">Profile</a></li>
+      <li><a href="login.html">Logout</a></li>
+    </ul>
+  </div>
+
+  <div class="main-content">
+    <header>
+      <h1>My Appointments</h1>
+      <button class="new-btn" onclick="location.href='book-appointment.html'">+ Book New Appointment</button>
+    </header>
+
+    <section class="appointments-section">
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Doctor</th>
+            <th>Department</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="appointmentsTable">
+          <tr>
+            <td>2025-10-10</td>
+            <td>2:00 PM</td>
+            <td>Dr. Jane Smith</td>
+            <td>Cardiology</td>
+            <td><span class="status upcoming">Upcoming</span></td>
+            <td><button class="cancel-btn">Cancel</button></td>
+          </tr>
+          <tr>
+            <td>2025-09-20</td>
+            <td>11:00 AM</td>
+            <td>Dr. John Doe</td>
+            <td>Dermatology</td>
+            <td><span class="status completed">Completed</span></td>
+            <td><button class="view-btn"><a href="view-appointment.html">View</a></button></td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </div>
+</body>
+</html>

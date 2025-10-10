@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Patient Profile | HMS</title>
+  <link rel="stylesheet" href="css/patient-profile.css">
+</head>
+<body>
+  <div class="container">
+    <aside class="sidebar">
+      <h2>Patient Panel</h2>
+      <ul>
+        <li><a href="patient-dashboard.html">Dashboard</a></li>
+        <li><a href="patient-appointments.html">My Appointments</a></li>
+        <li><a href="book-appointment.html">Book Appointment</a></li>
+        <li><a href="patient-records.html">Medical Records</a></li>
+        <li><a href="patient-profile.html" class="active">Profile</a></li>
+      </ul>
+    </aside>
+
+    <main class="main-content">
+      <header>
+        <h1>My Profile</h1>
+      </header>
+
+      <section class="profile-section">
+        <form id="profileForm">
+          <div class="form-group">
+            <label for="name">Full Name:</label>
+            <input type="text" id="name" value="John Doe" required>
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="email" id="email" value="john.doe@example.com" required>
+          </div>
+
+          <div class="form-group">
+            <label for="phone">Phone:</label>
+            <input type="text" id="phone" value="+254 700 123 456" required>
+          </div>
+
+          <div class="form-group">
+            <label for="address">Address:</label>
+            <textarea id="address" rows="3" required>123 Garden Estate, Nairobi</textarea>
+          </div>
+
+          <h2>Change Password</h2>
+
+          <div class="form-group">
+            <label for="currentPassword">Current Password:</label>
+            <input type="password" id="currentPassword" required>
+          </div>
+
+          <div class="form-group">
+            <label for="newPassword">New Password:</label>
+            <input type="password" id="newPassword" required>
+          </div>
+
+          <div class="form-group">
+            <label for="confirmPassword">Confirm Password:</label>
+            <input type="password" id="confirmPassword" required>
+          </div>
+
+          <div class="button-group">
+            <button type="submit" class="save-btn">Save Changes</button>
+            <button type="reset" class="cancel-btn">Cancel</button>
+          </div>
+        </form>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    // Simple validation and feedback
+    document.getElementById("profileForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+      const newPass = document.getElementById("newPassword").value;
+      const confirmPass = document.getElementById("confirmPassword").value;
+      
+      if (newPass !== confirmPass) {
+        alert("Passwords do not match!");
+        return;
+      }
+
+      alert("Profile updated successfully!");
+      // In a real system, here you'd send the data to backend
+    });
+  </script>
+</body>
+</html>

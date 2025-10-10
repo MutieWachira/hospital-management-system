@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Appointment Details | HMS Patient</title>
+  <link rel="stylesheet" href="css/view-appointment.css" />
+</head>
+<body>
+  <div class="sidebar">
+    <h2>HMS Patient</h2>
+    <ul>
+      <li><a href="patient-dashboard.html">Dashboard</a></li>
+      <li><a href="patient-appointments.html" class="active">My Appointments</a></li>
+      <li><a href="patient-ai-checker.html">AI Symptom Checker</a></li>
+      <li><a href="patient-records.html">Medical Records</a></li>
+      <li><a href="patient-profile.html">Profile</a></li>
+      <li><a href="login.html">Logout</a></li>
+    </ul>
+  </div>
+
+  <div class="main-content">
+    <header>
+      <h1>Appointment Details</h1>
+      <a href="patient-appointments.html" class="back-btn">← Back to Appointments</a>
+    </header>
+
+    <section class="appointment-details">
+      <div class="card">
+        <h2>Appointment Information</h2>
+        <p><strong>Date:</strong> <span id="date">2025-09-20</span></p>
+        <p><strong>Time:</strong> <span id="time">11:00 AM</span></p>
+        <p><strong>Doctor:</strong> <span id="doctor">Dr. John Doe</span></p>
+        <p><strong>Department:</strong> <span id="department">Dermatology</span></p>
+        <p><strong>Status:</strong> <span id="status" class="status completed">Completed</span></p>
+      </div>
+
+      <div class="card">
+        <h2>Consultation Summary</h2>
+        <p><strong>Diagnosis:</strong> <span id="diagnosis">Skin Rash</span></p>
+        <p><strong>Treatment:</strong> <span id="treatment">Ointment and Antihistamines</span></p>
+        <p><strong>Prescription:</strong></p>
+        <ul id="prescription">
+          <li>Hydrocortisone cream – Apply twice daily</li>
+          <li>Cetirizine 10mg – Once daily after meals</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <h2>Follow-Up</h2>
+        <p><strong>Next Visit:</strong> <span id="followUp">2025-10-10</span></p>
+        <p><strong>Doctor Notes:</strong></p>
+        <p id="notes">Avoid direct sunlight and use mild soap for 2 weeks.</p>
+      </div>
+    </section>
+  </div>
+</body>
+</html>
