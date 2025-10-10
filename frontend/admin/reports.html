@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reports - Admin Dashboard</title>
+  <link rel="stylesheet" href="css/reports.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <!-- ===== Sidebar ===== -->
+  <aside class="sidebar">
+    <h2>HealthTrack Admin</h2>
+    <ul>
+      <li><a href="index.html">Dashboard</a></li>
+      <li><a href="patients.html">Patients</a></li>
+      <li><a href="doctor.html">Doctors</a></li>
+      <li><a href="appointments.html">Appointments</a></li>
+      <li><a href="reports.html" class="active">Reports</a></li>
+      <li><a href="settings.html">Profile</a></li>
+    </ul>
+  </aside>
+
+  <!-- ===== Main Section ===== -->
+  <main class="main">
+    <div class="topbar">
+      <h2>System Reports</h2>
+      <div class="topbar-right">
+        <span class="material-symbols-outlined">notifications</span>
+        <span class="material-symbols-outlined">account_circle</span>
+      </div>
+    </div>
+
+    <!-- ===== Summary Cards ===== -->
+    <section class="summary-cards">
+      <div class="card patients">
+        <h3>Total Patients</h3>
+        <p id="totalPatients">245</p>
+      </div>
+      <div class="card doctors">
+        <h3>Total Doctors</h3>
+        <p id="totalDoctors">25</p>
+      </div>
+      <div class="card appointments">
+        <h3>Total Appointments</h3>
+        <p id="totalAppointments">120</p>
+      </div>
+      <div class="card completed">
+        <h3>Completed</h3>
+        <p id="completedAppointments">95</p>
+      </div>
+    </section>
+
+    <!-- ===== Appointment Chart ===== -->
+    <section class="chart-section">
+      <h3>Monthly Appointments Overview</h3>
+      <canvas id="appointmentsChart"></canvas>
+    </section>
+
+    <!-- ===== Table Report ===== -->
+    <section class="table-section">
+      <h3>Recent Appointment Summary</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Patient</th>
+            <th>Doctor</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>2025-10-01</td><td>John Doe</td><td>Dr. Alice</td><td>Completed</td></tr>
+          <tr><td>2025-10-02</td><td>Mary Jane</td><td>Dr. Brian</td><td>Pending</td></tr>
+          <tr><td>2025-10-03</td><td>Michael Kim</td><td>Dr. Smith</td><td>Cancelled</td></tr>
+        </tbody>
+      </table>
+    </section>
+  </main>
+
+  <script>
+    // Simple chart using Chart.js
+    const ctx = document.getElementById('appointmentsChart').getContext('2d');
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+        datasets: [{
+          label: 'Appointments',
+          data: [40, 35, 50, 30, 60, 45],
+          backgroundColor: '#1b88ee'
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true } }
+      }
+    });
+  </script>
+</body>
+</html>

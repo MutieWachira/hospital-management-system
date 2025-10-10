@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Patient Management - HMS Admin</title>
+  <link rel="stylesheet" href="css/patients.css" />
+</head>
+<body>
+  <div class="container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <h2>HMS Admin</h2>
+      <ul>
+      <li><a href="index.html">Dashboard</a></li>
+      <li><a href="patients.html" class="active">Patients</a></li>
+      <li><a href="doctor.html">Doctors</a></li>
+      <li><a href="appointments.html">Appointments</a></li>
+      <li><a href="reports.html">Reports</a></li>
+      <li><a href="settings.html">Profile</a></li>
+    </ul>
+    </aside>
+
+    <!-- Main -->
+    <main class="content">
+      <header class="topbar">
+        <h1>Patient Management</h1>
+        <div class="top-actions">
+          <input type="text" placeholder="Search patient..." id="searchBox" />
+          <button class="add-btn" id="addPatientBtn"><a href="add-patient.html">+ Add New Patient</a></button>
+        </div>
+      </header>
+
+      <!-- Patient Table -->
+      <section class="patients-table">
+        <h2>All Patients</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Full Name</th>
+              <th>Age</th>
+              <th>Gender</th>
+              <th>Phone</th>
+              <th>Doctor</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="patientList">
+            <tr>
+              <td>P12345</td>
+              <td>John Doe</td>
+              <td>30</td>
+              <td>Male</td>
+              <td>+254 712 345 678</td>
+              <td>Dr. Alice</td>
+              <td><span class="status active">Active</span></td>
+              <td>
+                <button class="view-btn">View</button>
+                <button class="edit-btn">Edit</button>
+                <button class="delete-btn">Delete</button>
+              </td>
+            </tr>
+            <tr>
+              <td>P12346</td>
+              <td>Jane Mwangi</td>
+              <td>27</td>
+              <td>Female</td>
+              <td>+254 711 222 333</td>
+              <td>Dr. Mark</td>
+              <td><span class="status discharged">Discharged</span></td>
+              <td>
+                <button class="view-btn"><a href="patient-details.html">View</a></button>
+                <button class="edit-btn">Edit</button>
+                <button class="delete-btn">Delete</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- Add/Edit Patient Form -->
+      <section class="patient-form hidden" id="patientFormSection">
+        <h2>Add / Edit Patient</h2>
+        <form id="patientForm">
+          <div class="form-grid">
+            <input type="text" id="patientName" placeholder="Full Name" required />
+            <input type="number" id="patientAge" placeholder="Age" required />
+            <select id="gender" required>
+              <option value="">Select Gender</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+            </select>
+            <input type="text" id="phone" placeholder="Phone" required />
+            <input type="text" id="address" placeholder="Address" required />
+            <input type="text" id="doctor" placeholder="Assigned Doctor" required />
+            <select id="status" required>
+              <option value="">Select Status</option>
+              <option value="Active">Active</option>
+              <option value="Discharged">Discharged</option>
+            </select>
+          </div>
+          <button type="submit" class="btn-submit">Save Patient</button>
+        </form>
+      </section>
+    </main>
+  </div>
+
+  <script src="js/patients.js"></script>
+</body>
+</html>

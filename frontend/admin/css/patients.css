@@ -1,0 +1,243 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  background: #f4f6f8;
+  color: #333;
+  display: flex;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.container {
+  display: flex;
+  width: 100%;
+}
+
+/* ===== Sidebar ===== */
+.sidebar {
+  width: 240px;
+  background: linear-gradient(180deg, #3b6ea1, #1b88ee);
+  color: #ecf0f1;
+  padding: 25px 15px;
+  position: fixed;
+  height: 100%;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+}
+
+.sidebar h2 {
+  margin-bottom: 35px;
+  text-align: center;
+  font-weight: 700;
+  font-size: 22px;
+}
+
+.sidebar ul {
+  list-style: none;
+}
+
+.sidebar ul li {
+  margin: 18px 0;
+}
+
+.sidebar ul li a {
+  color: #ecf0f1;
+  text-decoration: none;
+  display: block;
+  padding: 10px 15px;
+  border-radius: 8px;
+  transition: background 0.3s, transform 0.2s;
+}
+
+.sidebar ul li a.active,
+.sidebar ul li a:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateX(4px);
+}
+
+/* ===== Main Content ===== */
+.content {
+  flex: 1;
+  margin-left: 240px;
+  padding: 30px 40px;
+  overflow-y: auto;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+}
+
+.topbar h1 {
+  font-size: 26px;
+  font-weight: 600;
+  color: #2c3e50;
+}
+
+.top-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.top-actions input {
+  padding: 8px 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  width: 200px;
+}
+
+.add-btn {
+  background: #0077b6;
+  color: white;
+  border: none;
+  padding: 9px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.add-btn:hover {
+  background: #005f90;
+}
+
+/* ===== Table ===== */
+.patients-table {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 25px;
+}
+
+.patients-table table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.patients-table th, .patients-table td {
+  padding: 12px;
+  border-bottom: 1px solid #ddd;
+}
+
+.patients-table th {
+  background: #f8f9fa;
+  color: #333;
+}
+
+.status {
+  padding: 5px 10px;
+  border-radius: 5px;
+  color: #fff;
+  font-size: 13px;
+}
+
+.status.active {
+  background: #2ecc71;
+}
+
+.status.discharged {
+  background: #e74c3c;
+}
+
+/* ===== Buttons ===== */
+.view-btn, .edit-btn, .delete-btn {
+  border: none;
+  border-radius: 5px;
+  padding: 6px 10px;
+  margin-right: 5px;
+  cursor: pointer;
+  color: white;
+  font-size: 13px;
+}
+
+.view-btn { background: #3498db; }
+.edit-btn { background: #f1c40f; color: #333; }
+.delete-btn { background: #e74c3c; }
+
+.view-btn:hover { background: #217dbb; }
+.edit-btn:hover { background: #d4ac0d; }
+.delete-btn:hover { background: #c0392b; }
+
+/* ===== Add/Edit Patient Form ===== */
+.patient-form {
+  background: #fff;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.patient-form.hidden {
+  display: none;
+}
+
+.patient-form h2 {
+  margin-bottom: 15px;
+  color: #2c3e50;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.form-grid input, .form-grid select {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.btn-submit {
+  background: #0077b6;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.btn-submit:hover {
+  background: #005f90;
+}
+
+/* ===== Responsive Design ===== */
+@media (max-width: 800px) {
+  .sidebar {
+    width: 200px;
+  }
+
+  .content {
+    margin-left: 200px;
+    padding: 20px;
+  }
+
+  .topbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+}
+
+@media (max-width: 600px) {
+  .sidebar {
+    display: none;
+  }
+
+  .content {
+    margin-left: 0;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+}

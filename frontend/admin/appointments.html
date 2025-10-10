@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Appointment Management - Admin Dashboard</title>
+  <link rel="stylesheet" href="css/appointment.css" />
+</head>
+<body>
+
+  <!-- ===== Sidebar ===== -->
+  <div class="sidebar">
+    <h2>HealthTrack Admin</h2>
+   <ul>
+      <li><a href="index.html">Dashboard</a></li>
+      <li><a href="patients.html">Patients</a></li>
+      <li><a href="doctor.html">Doctors</a></li>
+      <li><a href="appointments.html" class="active">Appointments</a></li>
+      <li><a href="reports.html">Reports</a></li>
+      <li><a href="settings.html">Profile</a></li>
+    </ul>
+  </div>
+
+  <!-- ===== Main Section ===== -->
+  <div class="main">
+    <div class="topbar">
+      <h2>Appointment Management</h2>
+      <div class="topbar-right">
+        <span class="material-symbols-outlined">notifications</span>
+        <span class="material-symbols-outlined">account_circle</span>
+      </div>
+    </div>
+
+    <!-- ===== Appointment Controls ===== -->
+    <div class="appointment-controls">
+      <button class="add-btn"><a href="add-appointment.html">+ Add Appointment</a></button>
+      <input type="text" placeholder="Search by Patient or Doctor..." id="searchBox">
+    </div>
+
+    <!-- ===== Appointment Table ===== -->
+    <div class="appointments">
+      <table>
+        <thead>
+          <tr>
+            <th>Appointment ID</th>
+            <th>Patient Name</th>
+            <th>Doctor Name</th>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="appointmentList">
+          <tr>
+            <td>APT001</td>
+            <td>Mary Wanjiru</td>
+            <td>Dr. Kamau</td>
+            <td>2025-10-10</td>
+            <td>10:00 AM</td>
+            <td><span class="status pending">Pending</span></td>
+            <td>
+              <button class="approve">Approve</button>
+              <button class="cancel">Cancel</button>
+              <button class="delete">Delete</button>
+            </td>
+          </tr>
+          <tr>
+            <td>APT002</td>
+            <td>John Mwangi</td>
+            <td>Dr. Njeri</td>
+            <td>2025-10-11</td>
+            <td>1:00 PM</td>
+            <td><span class="status approved">Approved</span></td>
+            <td>
+              <button class="approve">Approve</button>
+              <button class="cancel">Cancel</button>
+              <button class="delete">Delete</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+</body>
+</html>

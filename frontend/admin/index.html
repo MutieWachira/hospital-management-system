@@ -7,55 +7,107 @@
   <link rel="stylesheet" href="css/index.css" />
 </head>
 <body>
-  <div class="admin-container">
+  <div class="container">
     <!-- Sidebar -->
     <aside class="sidebar">
       <h2>HMS Admin</h2>
       <ul>
-        <li><a href="admin-dashboard.html" class="active">🏠 Dashboard</a></li>
-        <li><a href="doctor.html">👨‍⚕️ Doctors</a></li>
-        <li><a href="patients.html">🧑‍🤝‍🧑 Patients</a></li>
-        <li><a href="appointments.html">📅 Appointments</a></li>
-      </ul>
-      <button id="logoutBtn">Logout</button>
+      <li><a href="index.html" class="active">Dashboard</a></li>
+      <li><a href="patients.html">Patients</a></li>
+      <li><a href="doctor.html">Doctors</a></li>
+      <li><a href="appointments.html">Appointments</a></li>
+      <li><a href="reports.html">Reports</a></li>
+      <li><a href="settings.html">Profile</a></li>
+    </ul>
     </aside>
 
-    <!-- Main Content -->
-    <main class="dashboard">
-      <header>
-        <h1>Admin Dashboard</h1>
+    <!-- Main -->
+    <main class="main">
+      <header class="topbar">
+        <h2>Admin Dashboard</h2>
+        <div class="topbar-right">
+          <span class="admin-name">Welcome, Admin</span>
+          <img src="../assets/admin-avatar.png" alt="Admin" class="admin-avatar" />
+        </div>
       </header>
 
-      <section class="stats">
+      <!-- Overview Cards -->
+      <section class="overview">
         <div class="card">
-          <h3>Doctors</h3>
-          <p id="doctorCount">0</p>
+          <h3>Total Patients</h3>
+          <p id="totalPatients">54</p>
         </div>
         <div class="card">
-          <h3>Patients</h3>
-          <p id="patientCount">0</p>
+          <h3>Total Doctors</h3>
+          <p id="totalDoctors">12</p>
         </div>
         <div class="card">
-          <h3>Appointments</h3>
-          <p id="appointmentCount">0</p>
+          <h3>Appointments Today</h3>
+          <p id="appointmentsToday">9</p>
         </div>
         <div class="card">
-          <h3>Departments</h3>
-          <p id="appointmentCount">0</p>
+          <h3>Total Nurses</h3>
+          <p id="totalNurses">18</p>
         </div>
-        
       </section>
 
+      <!-- Hospital Analytics -->
+      <section class="analytics">
+        <h2>Hospital Analytics</h2>
+        <div class="analytics-item">
+          <p>Bed Occupancy</p>
+          <div class="progress">
+            <div class="bar" style="width: 75%">75%</div>
+          </div>
+        </div>
+        <div class="analytics-item">
+          <p>Appointments Completed</p>
+          <div class="progress">
+            <div class="bar green" style="width: 60%">60%</div>
+          </div>
+        </div>
+        <div class="analytics-item">
+          <p>New Patients This Week</p>
+          <div class="progress">
+            <div class="bar blue" style="width: 40%">40%</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- System Alerts -->
+      <section class="alerts">
+        <h2>System Alerts</h2>
+        <ul>
+          <li>⚠️ Pharmacy stock for *Paracetamol* running low.</li>
+          <li>🔔 Upcoming appointment for <strong>Jane Mwangi</strong> tomorrow at 10 AM.</li>
+          <li>✅ System backup completed successfully.</li>
+        </ul>
+      </section>
+
+      <!-- Quick Links -->
+      <section class="quick-links">
+        <h2>Quick Links</h2>
+        <div class="links">
+          <a href="add-patient.html" class="btn">➕ Add New Patient</a>
+          <a href="doctors.html" class="btn">👨‍⚕️ View Doctors</a>
+          <a href="appointments.html" class="btn">📅 Manage Appointments</a>
+          <a href="reports.html" class="btn">📊 Generate Reports</a>
+        </div>
+      </section>
+
+      <!-- Recent Activity -->
       <section class="recent-activity">
-        <h2>Recent Activity</h2>
-        <ul id="recentList">
-          <li>System initialized...</li>
+        <h2>Recent Activities</h2>
+        <ul>
+          <li>New patient <strong>Mary Wanjiku</strong> added on 08 Oct 2025.</li>
+          <li>Doctor <strong>Dr. Kamau</strong> approved appointment #A456.</li>
+          <li>Admin updated record for <strong>John Doe</strong>.</li>
+          <li>New nurse <strong>Jane Njeri</strong> registered.</li>
         </ul>
       </section>
     </main>
   </div>
 
-  <script src="../app.js"></script>
-  <script src="admin.js"></script>
+  <script src="js/dashboard.js"></script>
 </body>
 </html>

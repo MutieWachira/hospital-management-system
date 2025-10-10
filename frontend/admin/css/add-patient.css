@@ -1,0 +1,57 @@
+/* ===== Add New Patient Page ===== */
+.add-patient {
+  background: #fff;
+  padding: 25px;
+  border-radius: 8px;
+  margin: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.add-patient h2 {
+  margin-bottom: 20px;
+  color: #1b6ac9;
+  border-bottom: 2px solid #0077b6;
+  display: inline-block;
+  padding-bottom: 5px;
+}
+
+#addPatientForm {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  font-weight: 600;
+  margin-bottom: 5px;
+  color: #333;
+}
+
+.form-group input,
+.form-group select {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.submit-btn {
+  grid-column: 1 / -1;
+  background: #0077b6;
+  color: #fff;
+  border: none;
+  padding: 12px 0;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.submit-btn:hover {
+  background: #0096c7;
+}
