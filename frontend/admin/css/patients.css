@@ -96,6 +96,7 @@ body {
 .add-btn {
   background: #0077b6;
   color: white;
+  text-decoration: none;
   border: none;
   padding: 9px 16px;
   border-radius: 6px;
@@ -156,14 +157,15 @@ body {
   cursor: pointer;
   color: white;
   font-size: 13px;
+  text-decoration: none;
 }
 
 .view-btn { background: #3498db; }
-.edit-btn { background: #f1c40f; color: #333; }
+.edit-btn { background: #0077b6; color: #333; }
 .delete-btn { background: #e74c3c; }
 
 .view-btn:hover { background: #217dbb; }
-.edit-btn:hover { background: #d4ac0d; }
+.edit-btn:hover { background: #0077b6; }
 .delete-btn:hover { background: #c0392b; }
 
 /* ===== Add/Edit Patient Form ===== */

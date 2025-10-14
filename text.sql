@@ -38,3 +38,16 @@ CREATE TABLE medical_records (
     FOREIGN KEY (patient_id) REFERENCES users(id),
     FOREIGN KEY (doctor_id) REFERENCES users(id)
 );
+
+CREATE TABLE patients (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  full_name VARCHAR(100) NOT NULL,
+  email VARCHAR(100) NOT NULL,
+  age INT,
+  gender VARCHAR(20),
+  blood_group VARCHAR(10),
+  phone VARCHAR(20),
+  address VARCHAR(150),
+  doctor VARCHAR(100),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

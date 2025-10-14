@@ -12,7 +12,12 @@
     <aside class="sidebar">
       <h2>HMS Admin</h2>
       <ul>
-        <li><a href="patients.html">← Back to Patients</a></li>
+        <li><a href="index.html">Dashboard</a></li>
+      <li><a href="patients.php" class="active">Patients</a></li>
+      <li><a href="doctor.html" >Doctors</a></li>
+      <li><a href="appointments.html">Appointments</a></li>
+      <li><a href="reports.html">Reports</a></li>
+      <li><a href="settings.html">Profile</a></li>
       </ul>
     </aside>
 
@@ -24,20 +29,25 @@
 
       <section class="add-patient">
         <h2>Patient Registration Form</h2>
-        <form id="addPatientForm">
+        <form method="POST" action="../../backend/add_patient.php" id="addPatientForm">
           <div class="form-group">
             <label for="patientName">Full Name:</label>
-            <input type="text" id="patientName" placeholder="Enter full name" required />
+            <input type="text" id="patientName" name="full_name" placeholder="Enter full name" required />
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email:</label>
+            <input type="text" id="email" name="email" placeholder="Enter email" required />
           </div>
 
           <div class="form-group">
             <label for="age">Age:</label>
-            <input type="number" id="age" placeholder="Enter age" required />
+            <input type="number" id="age" name="age" placeholder="Enter age" required />
           </div>
 
           <div class="form-group">
             <label for="gender">Gender:</label>
-            <select id="gender" required>
+            <select id="gender" name="gender" required>
               <option value="">Select gender</option>
               <option value="Male">Male</option>
               <option value="Female">Female</option>
@@ -47,30 +57,29 @@
 
           <div class="form-group">
             <label for="bloodGroup">Blood Group:</label>
-            <input type="text" id="bloodGroup" placeholder="e.g. O+" required />
+            <input type="text" name="blood_group" id="bloodGroup" placeholder="e.g. O+" required />
           </div>
 
           <div class="form-group">
             <label for="phone">Phone Number:</label>
-            <input type="text" id="phone" placeholder="+254 712 345 678" required />
+            <input type="text" id="phone" name="phone" placeholder="+254 712 345 678" required />
           </div>
 
           <div class="form-group">
             <label for="address">Address:</label>
-            <input type="text" id="address" placeholder="Enter address" required />
+            <input type="text" id="address" name="address" placeholder="Enter address" required />
           </div>
 
           <div class="form-group">
             <label for="doctor">Assigned Doctor:</label>
-            <input type="text" id="doctor" placeholder="Enter doctor name" required />
+            <input type="text" id="doctor" name="doctor" placeholder="Enter doctor name" required />
           </div>
 
-          <button type="submit" class="submit-btn">Save Patient</button>
+          <button type="submit"  class="submit-btn" name="submit">Save Patient</button>
         </form>
       </section>
     </main>
   </div>
 
-  <script src="js/add-patient.js"></script>
 </body>
 </html>

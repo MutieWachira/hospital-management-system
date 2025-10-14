@@ -1,12 +1,19 @@
-document.addEventListener("DOMContentLoaded", () => {
-  fetch("http://localhost/hms/backend/get_data_admin_dashboard.php")
-    .then(res => res.json())
-    .then(data => {
-      // Update the dashboard numbers
-      document.getElementById("totalPatients").textContent = data.total_patients;
-      document.getElementById("totalDoctors").textContent = data.total_doctors;
-      document.getElementById("totalNurses").textContent = data.total_nurses;
-      document.getElementById("appointmentsToday").textContent = data.appointments_today;
-    })
-    .catch(err => console.error("Error loading dashboard:", err));
-});
+  fetch("../../backend/fetch_patients.php")
+      .then(response => response.json())
+      .then(data => {
+        const tbody = document.getElementById("patientList");
+        data.forEach(patient => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${patient.id}</td>
+            <td>${patient.full_name}</td>
+            <td>${patient.email}</td>
+            <td>${patient.age}</td>
+            <td>${patient.gender}</td>
+            <td>${patient.contact}</td>
+            <td><button>Edit</button> <button>Delete</button></td>
+          `;
+          tbody.appendChild(row);
+        });
+      })
+      .catch(err => console.error("Error fetching patients:", err));
