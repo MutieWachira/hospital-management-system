@@ -1,23 +1,37 @@
-// Hardcoded demo users with auto role detection
-const users = [
-  { role: "admin", email: "admin@hms.com", password: "admin123", redirect: "admin/index.html" },
-  { role: "doctor", email: "doctor@hms.com", password: "doctor123", redirect: "doctor/doctor-dashboard.html" },
-  { role: "patient", email: "patient@hms.com", password: "patient123", redirect: "patient/patient-dashboard.html" },
-];
-
-document.getElementById("loginForm").addEventListener("submit", function (e) {
+document.getElementById("loginForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value.trim();
+  // Collect form input values
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
 
-  // Search for matching user
-  const user = users.find(u => u.email === email && u.password === password);
+  // Use FormData for sending normal POST data
+  const formData = new FormData();
+  formData.append("email", email);
+  formData.append("password", password);
 
-  if (user) {
-    alert(`Welcome ${user.role.toUpperCase()}! Redirecting to your dashboard...`);
-    window.location.href = user.redirect;
-  } else {
-    alert("Invalid email or password. Please try again.");
+  try {
+    // Adjust URL based on your file structure
+    const response = await fetch("../backend/login.php", {
+      method: "POST",
+      body: formData, // ✅ send FormData instead of JSON
+    });
+
+    // Because PHP redirects on success, we check status
+    if (response.redirected) {
+      window.location.href = response.url;
+      return;
+    }
+
+    // If PHP returns JSON or text (like an error)
+    const resultText = await response.text();
+    console.log(resultText);
+
+    if (resultText.includes("Invalid")) {
+      alert("❌ Invalid email or password.");
+    }
+  } catch (error) {
+    console.error("Login error:", error);
+    alert("⚠️ Unable to connect to server. Check your backend setup.");
   }
 });
