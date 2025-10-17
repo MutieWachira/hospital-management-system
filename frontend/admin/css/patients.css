@@ -21,7 +21,7 @@ body {
 /* ===== Sidebar ===== */
 .sidebar {
   width: 240px;
-  background: linear-gradient(180deg, #3b6ea1, #1b88ee);
+  background: linear-gradient(180deg, #1b88ee, #1b88ee);
   color: #ecf0f1;
   padding: 25px 15px;
   position: fixed;
@@ -55,8 +55,8 @@ body {
 
 .sidebar ul li a.active,
 .sidebar ul li a:hover {
-  background: rgba(255, 255, 255, 0.1);
-  transform: translateX(4px);
+  background-color: #38bdf8;
+  color: #fff;
 }
 
 /* ===== Main Content ===== */
@@ -117,10 +117,19 @@ body {
   margin-bottom: 25px;
 }
 
+.patients-table h2 {
+      margin-bottom: 20px;
+    font-size: 22px;
+    color: #2c3e50;
+    border-bottom: 2px solid #0077b6;
+    padding-bottom: 10px;
+}
+
 .patients-table table {
   width: 100%;
   border-collapse: collapse;
   text-align: left;
+  margin-top: 10px;
 }
 
 .patients-table th, .patients-table td {
@@ -129,8 +138,8 @@ body {
 }
 
 .patients-table th {
-  background: #f8f9fa;
-  color: #333;
+  background: #0077b6;
+  color: #ffffff;
 }
 
 .status {

@@ -83,7 +83,7 @@ header.topbar h2 {
 }
 
 /* === FORM SECTION === */
-.add-doctor {
+.add-appointment {
   background: #fff;
   margin-top: 30px;
   padding: 25px;
@@ -91,7 +91,7 @@ header.topbar h2 {
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
 }
 
-.add-doctor h2 {
+.add-appointment h2 {
   margin-bottom: 20px;
   color: #0f172a;
   font-size: 20px;

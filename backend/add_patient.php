@@ -19,22 +19,34 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $phone = $_POST['phone'];
     $address = $_POST['address'];
     $doctor = $_POST['doctor'];
+    $password = $_POST['password'] ?? '';
+    $confirm_password = $_POST['confirm_password'] ?? '';
 
     // Validate required fields
-    if (empty($full_name) || empty($email) || empty($age) || empty($gender) || empty($blood_group) || empty($phone) || empty($address) || empty($doctor)) {
+    if (empty($full_name) || empty($email) || empty($age) || empty($gender) || empty($blood_group) || empty($phone) || empty($address) || empty($doctor) || empty($password) || empty($confirm_password)) {
         echo "All fields are required!";
         exit;
     }
 
-    // Insert into database (assuming 'users' table has these columns)
-    $sql = "INSERT INTO `patients` (`id`, `full_name`, `email`, `age`, `gender`, `blood_group`, `phone`, `address`, `doctor`, `role`, `created_at`) VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?, 'patient', current_timestamp());";
+    // Check if passwords match
+    if ($password !== $confirm_password) {
+        echo "<script>alert('Passwords do not match!'); window.history.back();</script>";
+        exit;
+    }
+
+    // Hash the password securely
+    $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+
+    // Insert into database
+    $sql = "INSERT INTO `patients` 
+            (`id`, `full_name`, `email`, `age`, `gender`, `blood_group`, `phone`, `address`, `doctor`, `password`, `role`, `created_at`) 
+            VALUES (NULL, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'patient', CURRENT_TIMESTAMP())";
 
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ssisssss", $full_name, $email, $age, $gender, $blood_group, $phone, $address, $doctor);
+    $stmt->bind_param("ssissssss", $full_name, $email, $age, $gender, $blood_group, $phone, $address, $doctor, $hashedPassword);
 
     if ($stmt->execute()) {
-        echo "Patient added successfully!";
-        header("Location: ../frontend/admin/patients.php"); // Redirect to patients list
+        echo "<script>alert('Patient added successfully!'); window.location.href='../frontend/admin/patients.php';</script>";
         exit;
     } else {
         echo "Error: " . $stmt->error;

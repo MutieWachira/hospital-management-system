@@ -1,5 +1,9 @@
 <?php
 include '../../backend/db_connect.php';
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
+
+
 session_start();
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
@@ -18,14 +22,13 @@ if ($result && $result->num_rows > 0) {
 $conn->close();
 ?>
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Add New Patient - HMS</title>
-  <link rel="stylesheet" href="css/patient-details.css" />
+  <title>Add Appointment - HMS</title>
+  <link rel="stylesheet" href="css/add-appointment.css" />
 </head>
 <body>
   <div class="container">
@@ -34,24 +37,24 @@ $conn->close();
       <h2>HMS Admin</h2>
       <ul>
         <li><a href="index.php">Dashboard</a></li>
-        <li><a href="patients.php" class="active">Patients</a></li>
+        <li><a href="patients.php">Patients</a></li>
         <li><a href="doctor.php">Doctors</a></li>
-        <li><a href="appointments.php">Appointments</a></li>
+        <li><a href="appointments.php" class="active">Appointments</a></li>
         <li><a href="reports.php">Reports</a></li>
         <li><a href="settings.php">Profile</a></li>
-        <li class="logout"><a href="logout.php">Logout</a></li>
+        <li><a href="../../backend/logout.php">Logout</a></li>
       </ul>
     </aside>
 
     <!-- Main -->
     <main class="content">
       <header class="topbar">
-        <h2>Add New Patient</h2>
+        <h2>Add an Appointment</h2>
       </header>
 
-      <section class="add-patient">
-        <h2>Patient Registration Form</h2>
-        <form method="POST" action="../../backend/add_patient.php" id="addPatientForm">
+      <section class="add-appointment">
+        <h2>Appointment Booking Form</h2>
+        <form method="POST" action="../../backend/add_appointment.php" id="addAppointmentForm">
           
           <div class="form-group">
             <label for="patientName">Full Name:</label>
@@ -61,36 +64,6 @@ $conn->close();
           <div class="form-group">
             <label for="email">Email:</label>
             <input type="email" id="email" name="email" placeholder="Enter email" required />
-          </div>
-
-          <div class="form-group">
-            <label for="age">Age:</label>
-            <input type="number" id="age" name="age" placeholder="Enter age" required />
-          </div>
-
-          <div class="form-group">
-            <label for="gender">Gender:</label>
-            <select id="gender" name="gender" required>
-              <option value="">Select gender</option>
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-              <option value="Other">Other</option>
-            </select>
-          </div>
-
-          <div class="form-group">
-            <label for="bloodGroup">Blood Group:</label>
-            <input type="text" name="blood_group" id="bloodGroup" placeholder="e.g. O+" required />
-          </div>
-
-          <div class="form-group">
-            <label for="phone">Phone Number:</label>
-            <input type="text" id="phone" name="phone" placeholder="+254 712 345 678" required />
-          </div>
-
-          <div class="form-group">
-            <label for="address">Address:</label>
-            <input type="text" id="address" name="address" placeholder="Enter address" required />
           </div>
 
           <div class="form-group">
@@ -105,18 +78,32 @@ $conn->close();
             </select>
           </div>
 
-          <!-- 🔒 Password Fields -->
           <div class="form-group">
-            <label for="password">Password:</label>
-            <input type="password" id="password" name="password" placeholder="Enter password" required />
+            <label for="description">Description:</label>
+            <textarea id="description" name="description" rows="3" placeholder="Enter description" required></textarea>
           </div>
 
           <div class="form-group">
-            <label for="confirmPassword">Confirm Password:</label>
-            <input type="password" id="confirmPassword" name="confirm_password" placeholder="Re-enter password" required />
+            <label for="appointment-date">Appointment Date:</label>
+            <input type="date" id="appointment-date" name="appointment_date" required />
           </div>
 
-          <button type="submit" class="submit-btn" name="submit">Save Patient</button>
+          <div class="form-group">
+            <label for="appointment-time">Appointment Time:</label>
+            <input type="time" id="appointment-time" name="appointment_time" required />
+          </div>
+          
+          <div class="form-group">
+            <label for="status">Status:</label>
+            <select id="status" name="status" required>
+              <option value="">Select Status</option>
+              <option value="Pending">Pending</option>
+              <option value="Accepted">Accepted</option>
+              <option value="Rejected">Rejected</option>
+            </select>
+          </div>
+
+          <button type="submit" class="submit-btn" name="submit">Save Appointment</button>
         </form>
       </section>
     </main>

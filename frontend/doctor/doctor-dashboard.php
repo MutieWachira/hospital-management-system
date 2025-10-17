@@ -11,10 +11,10 @@
   <aside class="sidebar">
     <h2>Doctor Portal</h2>
     <ul>
-      <li><a href="doctor-dashboard.html" class="active">Dashboard</a></li>
-      <li><a href="doctor-patients.html">My Patients</a></li>
-      <li><a href="doctor-appointments.html">My Appointments</a></li>
-      <li><a href="doctor-profile.html">Profile</a></li>
+      <li><a href="doctor-dashboard.php" class="active">Dashboard</a></li>
+      <li><a href="doctor-patients.php">My Patients</a></li>
+      <li><a href="doctor-appointments.php">My Appointments</a></li>
+      <li><a href="doctor-profile.php">Profile</a></li>
     </ul>
   </aside>
 

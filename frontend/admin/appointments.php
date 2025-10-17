@@ -12,8 +12,8 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
   exit;
 }
 
-// Fetch all patients
-$sql = "SELECT * FROM patients ORDER BY id DESC";
+// Fetch all appointments
+$sql = "SELECT * FROM appointments ORDER BY id DESC";
 $result = $conn->query($sql);
 
 $search = $_GET['search'] ?? '';
@@ -21,16 +21,16 @@ $search = $_GET['search'] ?? '';
 // If search is not empty, filter results
 if (!empty($search)) {
     $stmt = $conn->prepare("
-        SELECT * FROM patients 
-        WHERE full_name LIKE ? 
-        OR phone LIKE ? 
-        OR doctor LIKE ?
+        SELECT * FROM appointments 
+        WHERE patient_name LIKE ? 
+        OR doctor_name LIKE ?
+        OR patient_email LIKE ?
         ORDER BY id DESC
     ");
     $like = "%$search%";
     $stmt->bind_param("sss", $like, $like, $like);
 } else {
-    $stmt = $conn->prepare("SELECT * FROM patients ORDER BY id DESC");
+    $stmt = $conn->prepare("SELECT * FROM appointments ORDER BY id DESC");
 }
 
 $stmt->execute();
@@ -42,8 +42,8 @@ $result = $stmt->get_result();
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Patient Management - HMS Admin</title>
-  <link rel="stylesheet" href="css/patients.css" />
+  <title>Appointment Management - HMS Admin</title>
+  <link rel="stylesheet" href="css/appointment.css" />
 </head>
 <body>
   <div class="container">
@@ -52,9 +52,9 @@ $result = $stmt->get_result();
       <h2>HMS Admin</h2>
       <ul>
         <li><a href="index.php">Dashboard</a></li>
-        <li><a href="patients.php" class="active">Patients</a></li>
+        <li><a href="patients.php">Patients</a></li>
         <li><a href="doctor.php">Doctors</a></li>
-        <li><a href="appointments.php">Appointments</a></li>
+        <li><a href="appointments.php" class="active">Appointments</a></li>
         <li><a href="reports.php">Reports</a></li>
         <li><a href="settings.php">Profile</a></li>
         <li><a href="../../backend/logout.php">Logout</a></li>
@@ -64,7 +64,7 @@ $result = $stmt->get_result();
     <!-- Main -->
     <main class="content">
       <header class="topbar">
-        <h1>Patient Management</h1>
+        <h1>Appointment Management</h1>
         <div class="top-actions">
           <form method="GET" class="search-form">
             <input 
@@ -74,22 +74,22 @@ $result = $stmt->get_result();
               value="<?= isset($_GET['search']) ? htmlspecialchars($_GET['search']) : '' ?>" 
             />
           </form>
-          <a href="add-patient.php" class="add-btn">+ Add New Patient</a>
+          <a href="add-appointment.php" class="add-btn">+ New Appointment</a>
         </div>
       </header>
 
-      <!-- Patient Table -->
-      <section class="patients-table">
-        <h2>All Patients</h2>
+      <!-- Appointment Table -->
+      <section class="appointment-table">
+        <h2>All Appointments</h2>
         <table>
           <thead>
             <tr>
-              <th>Full Name</th>
-              <th>Email</th>
-              <th>Age</th>
-              <th>Gender</th>
-              <th>Phone</th>
-              <th>Doctor</th>
+              <th>Patient Name</th>
+              <th>Doctor Name</th>
+              <th>Patient Email</th>
+              <th>Appointment Date</th>
+              <th>Appointment Time</th>
+              <th>Status</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -98,21 +98,21 @@ $result = $stmt->get_result();
             if ($result && $result->num_rows > 0) {
               while ($row = $result->fetch_assoc()) {
                 echo "<tr>
-                        <td>" . htmlspecialchars($row['full_name']) . "</td>
-                        <td>" . htmlspecialchars($row['email']) . "</td>
-                        <td>" . htmlspecialchars($row['age']) . "</td>
-                        <td>" . htmlspecialchars($row['gender']) . "</td>
-                        <td>" . htmlspecialchars($row['phone']) . "</td>
-                        <td>" . htmlspecialchars($row['doctor']) . "</td>
+                        <td>" . htmlspecialchars($row['patient_name']) . "</td>
+                        <td>" . htmlspecialchars($row['doctor_name']) . "</td>
+                        <td>" . htmlspecialchars($row['patient_email']) . "</td>
+                        <td>" . htmlspecialchars($row['appointment_date']) . "</td>
+                        <td>" . htmlspecialchars($row['appointment_time']) . "</td>
+                        <td>" . htmlspecialchars($row['status']) . "</td>
                         <td>
-                          <a href='edit-patient.php?id=" . $row['id'] . "' class='edit-btn'>Edit</a>
-                          <a href='delete-patient.php?id=" . $row['id'] . "' class='delete-btn' 
-   onclick=\"return confirm('Are you sure you want to delete this patient?')\">Delete</a>
+                          <a href='edit-appointment.php?id=" . $row['id'] . "' class='edit-btn'>Edit</a>
+                          <a href='delete-appointment.php?id=" . $row['id'] . "' class='delete-btn' 
+   onclick=\"return confirm('Are you sure you want to delete this appointment?')\">Delete</a>
                         </td>
                       </tr>";
               }
             } else {
-              echo "<tr><td colspan='8' style='text-align:center;'>No patients found</td></tr>";
+              echo "<tr><td colspan='10' style='text-align:center;'>No doctors found</td></tr>";
             }
 
             $conn->close();
