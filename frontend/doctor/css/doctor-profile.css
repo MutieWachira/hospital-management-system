@@ -19,7 +19,7 @@ body {
 /* ===== Sidebar ===== */
 .sidebar {
   width: 240px;
-  background: linear-gradient(180deg, #1e3a8a, #3b82f6);
+  background: #1b88ee;
   color: #fff;
   padding: 25px 15px;
   position: fixed;
@@ -29,6 +29,7 @@ body {
 .sidebar h2 {
   text-align: center;
   margin-bottom: 25px;
+  color: white;
 }
 
 .sidebar ul {
@@ -50,8 +51,8 @@ body {
 
 .sidebar ul li a:hover,
 .sidebar ul li a.active {
-  background: rgba(255, 255, 255, 0.15);
-  transform: translateX(4px);
+ background: #38bdf8;
+  color: #ffffff;
 }
 
 /* ===== Main Content ===== */
@@ -135,6 +136,7 @@ button {
   border-radius: 6px;
   cursor: pointer;
   transition: background 0.3s;
+  margin-top: 20px;
 }
 
 button:hover {

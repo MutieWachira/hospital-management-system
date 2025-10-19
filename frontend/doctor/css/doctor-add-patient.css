@@ -61,82 +61,67 @@ body {
   margin-top: auto;
 }
 
-.content {
+.topbar h2 {
+  margin-bottom: 20px;
+}
+
+.main {
   flex: 1;
-  padding: 30px;
-  background: #f8f9fb;
+  padding: 25px;
   overflow-y: auto;
+
 }
 
-.patient-header {
-  display: flex;
-  align-items: center;
+
+.form-section {
   background: white;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 0 5px rgba(0,0,0,0.1);
+  border-radius: 8px;
+  padding: 25px;
+  max-width: 600px;
+  box-shadow: 0 0 8px rgba(0,0,0,0.1);
 }
 
-.patient-header img {
-  width: 90px;
-  height: 90px;
-  border-radius: 50%;
-  margin-right: 20px;
-}
-
-section {
-  background: white;
-  padding: 20px;
-  margin-top: 20px;
-  border-radius: 10px;
-  box-shadow: 0 0 5px rgba(0,0,0,0.1);
-}
-
-h2 {
+.form-group {
   margin-bottom: 15px;
 }
 
-table {
+.form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.form-group input, 
+.form-group select {
   width: 100%;
-  border-collapse: collapse;
-  margin-top: 10px;
-  text-align: center;
-}
-
-th, td {
   padding: 10px;
-  border-bottom: 1px solid #ddd;
-}
-
-input, button {
-  padding: 10px;
-  margin: 5px;
   border: 1px solid #ccc;
-  border-radius: 6px;
+  border-radius: 4px;
 }
 
-button {
-  background: #0073e6;
+.btn {
+  background: #004080;
   color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
   cursor: pointer;
-  transition: 0.3s;
 }
 
-button:hover {
-  background: #005bb5;
+.btn:hover {
+  background: #007bff;
 }
 
-.top-actions {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 15px;
+.success {
+  color: green;
+  background: #e6ffe6;
+  padding: 10px;
+  border-radius: 5px;
 }
 
-.print-btn {
-  background: #28a745;
-}
-
-.print-btn:hover {
-  background: #1f7e34;
+.error {
+  color: red;
+  background: #ffe6e6;
+  padding: 10px;
+  border-radius: 5px;
 }

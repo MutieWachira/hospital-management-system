@@ -77,3 +77,40 @@ VALUES
 ('Alice Williams', 'alice.williams@example.com', 'Dr. John Smith', 'Regular check-up', '2023-09-15', '10:00:00', 'pending'),
 ('Bob Johnson', 'bob.johnson@example.com', 'Dr. Emily Johnson', 'Follow-up visit', '2023-09-16', '11:00:00', 'pending'),
 ('Charlie Brown', 'charlie.brown@example.com', 'Dr. Michael Brown', 'Consultation', '2023-09-17', '12:00:00', 'pending');
+
+--medical records table
+CREATE TABLE medical_records (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  patient_id INT,
+  date DATE,
+  diagnosis VARCHAR(255),
+  treatment VARCHAR(255),
+  doctor_notes TEXT,
+  FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE
+);
+
+--prescription table
+CREATE TABLE prescriptions (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  patient_id INT,
+  drug_name VARCHAR(255),
+  dosage VARCHAR(100),
+  duration VARCHAR(100)
+);
+
+ALTER TABLE prescriptions ADD COLUMN date_added DATE DEFAULT CURRENT_DATE;
+
+CREATE TABLE doctor_reports (
+  id INT(11) AUTO_INCREMENT PRIMARY KEY,
+  doctor_id INT(11) NOT NULL,
+  patient_id INT(11) NOT NULL,
+  doctor_name VARCHAR(100) NOT NULL,
+  patient_name VARCHAR(100) NOT NULL,
+  diagnosis TEXT NOT NULL,
+  treatment TEXT NOT NULL,
+  report_date DATE NOT NULL DEFAULT (CURRENT_DATE),
+  notes TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (doctor_id) REFERENCES doctors(id) ON DELETE CASCADE,
+  FOREIGN KEY (patient_id) REFERENCES patients(id) ON DELETE CASCADE
+);

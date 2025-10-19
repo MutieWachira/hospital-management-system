@@ -14,7 +14,7 @@ body {
 /* Sidebar */
 .sidebar {
   width: 240px;
-  background: linear-gradient(180deg, #0077b6, #1b88ee);
+  background: #1b88ee;
   color: white;
   padding: 25px 15px;
   height: 100vh;
@@ -44,7 +44,8 @@ body {
 
 .sidebar ul li a:hover,
 .sidebar ul li a.active {
-  background: rgba(255, 255, 255, 0.15);
+    background: #38bdf8;
+    color: #ffffff;
 }
 
 /* Main */
@@ -59,11 +60,17 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: white;
-  padding: 15px 25px;
+  padding: 5px 10px;
   border-radius: 8px;
   margin-bottom: 20px;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+.topbar .add-btn{
+  padding: 8px 15px;
+  background: #1b88ee;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
 }
 
 .search-box {
@@ -126,6 +133,7 @@ th {
   border: none;
   border-radius: 6px;
   cursor: pointer;
+  text-decoration: none;
 }
 
 .view-btn:hover {
