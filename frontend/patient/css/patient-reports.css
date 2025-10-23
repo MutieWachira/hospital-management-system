@@ -7,8 +7,8 @@
 
 body {
   display: flex;
-  background-color: #f4f6f8;
   min-height: 100vh;
+  background-color: #f4f6f8;
 }
 
 .container {
@@ -64,62 +64,43 @@ body {
   overflow-y: auto;
 }
 
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 .topbar h1 {
   color: #333;
 }
 
-.message {
-  background: #e6f7e9;
-  border-left: 5px solid #32cd32;
-  padding: 10px;
-  color: #333;
-  border-radius: 6px;
-  margin-bottom: 20px;
+.actions {
+  display: flex;
+  gap: 10px;
 }
 
-.book-appointment {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  margin-bottom: 25px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-
-.form-group {
-  margin-bottom: 15px;
-}
-
-label {
-  display: block;
-  font-weight: bold;
-  color: #1b88ee;
-  margin-bottom: 6px;
-}
-
-input, select {
-  width: 100%;
+.actions input, .actions button {
   padding: 8px;
-  border: 1px solid #ccc;
   border-radius: 6px;
+  border: 1px solid #ccc;
 }
 
-button {
+.actions button {
   background-color: #1b88ee;
   color: white;
   border: none;
-  padding: 10px 16px;
-  border-radius: 6px;
   cursor: pointer;
 }
 
-button:hover {
+.actions button:hover {
   background-color: #007bff;
 }
 
-.appointments {
+.reports {
   background: white;
   padding: 20px;
   border-radius: 8px;
+  margin-top: 20px;
   box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
@@ -139,24 +120,6 @@ th {
   color: white;
 }
 
-.status {
-  font-weight: bold;
-  text-transform: capitalize;
-}
-
-.status.pending { color: orange; }
-.status.completed { color: green; }
-.status.cancelled { color: red; }
-
-.cancel {
-  color: red;
-  text-decoration: none;
-}
-
-.cancel:hover {
-  text-decoration: underline;
-}
-
 .no-data {
   text-align: center;
   color: #888;
@@ -165,5 +128,5 @@ th {
 
 @media (max-width: 768px) {
   .sidebar { width: 180px; }
-  .book-appointment, .appointments { padding: 15px; }
+  .actions { flex-wrap: wrap; }
 }
