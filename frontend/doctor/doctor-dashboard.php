@@ -5,54 +5,65 @@ error_reporting(E_ALL);
 include '../../backend/db_connect.php';
 session_start();
 
-// require doctor login
+// Ensure doctor login
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'doctor') {
   header("Location: ../../frontend/login.html");
   exit;
 }
 
-// Fetch quick stats
 $doctor_id = (int) $_SESSION['user_id'];
 $doctor_name = $_SESSION['name'] ?? '';
 
-// Total patients added by this doctor
-$patientsCount = 0;
-if ($stmt = $conn->prepare("SELECT COUNT(*) AS total FROM patients WHERE id = ?")) {
-  $stmt->bind_param("i", $doctor_id);
-  $stmt->execute();
-  $res = $stmt->get_result();
-  $patientsCount = $res->fetch_assoc()['total'] ?? 0;
-  $stmt->close();
-} else if ($doctor_name && $stmt = $conn->prepare("SELECT COUNT(*) AS total FROM patients WHERE doctor = ?")) {
-  // fallback if patients table stores doctor name instead of id
-  $stmt->bind_param("s", $doctor_name);
-  $stmt->execute();
-  $res = $stmt->get_result();
-  $patientsCount = $res->fetch_assoc()['total'] ?? 0;
-  $stmt->close();
-}
+// =============================
+// Quick Stats
+// =============================
 
-// Today's appointments
+// 1️⃣ Total patients seen (appointments completed)
+$query = $conn->prepare("SELECT COUNT(*) AS total FROM appointments WHERE doctor_name = ? AND status = 'Completed'");
+$query->bind_param("s", $doctor_name);
+$query->execute();
+$patientsCount = $query->get_result()->fetch_assoc()['total'] ?? 0;
+$query->close();
+
+// 2️⃣ Today's appointments (any status)
 $today = date('Y-m-d');
-$appointmentsCount = 0;
-if ($stmt = $conn->prepare("SELECT COUNT(*) AS total FROM appointments WHERE doctor_id = ? AND DATE(appointment_date) = ?")) {
-  $stmt->bind_param("is", $doctor_id, $today);
-  $stmt->execute();
-  $res = $stmt->get_result();
-  $appointmentsCount = $res->fetch_assoc()['total'] ?? 0;
-  $stmt->close();
+$query = $conn->prepare("SELECT COUNT(*) AS total FROM appointments WHERE doctor_name = ? AND appointment_date = ?");
+$query->bind_param("ss", $doctor_name, $today);
+$query->execute();
+$appointmentsCount = $query->get_result()->fetch_assoc()['total'] ?? 0;
+$query->close();
+
+// 3️⃣ Reports created by this doctor
+$query = $conn->prepare("SELECT COUNT(*) AS total FROM doctor_reports WHERE doctor_id = ?");
+$query->bind_param("i", $doctor_id);
+$query->execute();
+$reportsCount = $query->get_result()->fetch_assoc()['total'] ?? 0;
+$query->close();
+
+// =============================
+// Chart Data: Patients Seen Each Month
+// =============================
+$chartData = array_fill(1, 12, 0); // Initialize months Jan–Dec
+
+$sql = "
+  SELECT MONTH(appointment_date) AS month, COUNT(*) AS total
+  FROM appointments
+  WHERE doctor_name = ? AND status = 'Completed'
+  GROUP BY MONTH(appointment_date)
+";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("s", $doctor_name);
+$stmt->execute();
+$res = $stmt->get_result();
+
+while ($row = $res->fetch_assoc()) {
+  $chartData[(int)$row['month']] = (int)$row['total'];
 }
+$stmt->close();
+$conn->close();
 
-// Total reports (if reports table exists)
-// $reportsCount = 0;
-// if ($stmt = $conn->prepare("SELECT COUNT(*) AS total FROM reports WHERE doctor_id = ?")) {
-//   $stmt->bind_param("i", $doctor_id);
-//   $stmt->execute();
-//   $res = $stmt->get_result();
-//   $reportsCount = $res->fetch_assoc()['total'] ?? 0;
-//   $stmt->close();
-//}
-
+// Encode for Chart.js
+$chartDataJson = json_encode(array_values($chartData));
 ?>
 
 <!DOCTYPE html>
@@ -90,45 +101,54 @@ if ($stmt = $conn->prepare("SELECT COUNT(*) AS total FROM appointments WHERE doc
       <section class="stats">
         <div class="stat-card">
           <h3><?= $patientsCount ?></h3>
-          <p>Total Patients</p>
+          <p>Patients Seen</p>
         </div>
         <div class="stat-card">
           <h3><?= $appointmentsCount ?></h3>
           <p>Today's Appointments</p>
         </div>
-        <!-- <div class="stat-card">
+        <div class="stat-card">
           <h3><?= $reportsCount ?></h3>
           <p>Total Reports</p>
-        </div> -->
+        </div> 
       </section>
 
       <!-- Chart Section -->
       <section class="chart-section">
-        <h3>Monthly Patients Overview</h3>
+        <h3>Monthly Patients Seen Overview</h3>
         <canvas id="patientChart"></canvas>
       </section>
     </main>
   </div>
 
   <script>
-    // Simple bar chart for patients added each month
+    const monthlyData = <?= $chartDataJson ?>;
+
     const ctx = document.getElementById('patientChart').getContext('2d');
     new Chart(ctx, {
-      type: 'bar',
+      type: 'line',
       data: {
         labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
         datasets: [{
-          label: 'Patients Added',
-          data: [5, 3, 7, 4, 6, 8, 2, 9, 10, 6, 4, 5], // You can later make this dynamic
-          backgroundColor: 'rgba(54, 162, 235, 0.6)',
-          borderColor: '#007bff',
-          borderWidth: 1,
-          borderRadius: 6
+          label: 'Patients Seen',
+          data: monthlyData,
+          fill: true,
+          borderColor: '#1b88ee',
+          backgroundColor: 'rgba(27,136,238,0.1)',
+          tension: 0.3,
+          pointBackgroundColor: '#1b88ee'
         }]
       },
       options: {
         responsive: true,
-        scales: { y: { beginAtZero: true } }
+        scales: { y: { beginAtZero: true } },
+        plugins: {
+          legend: { display: true, position: 'top' },
+          title: {
+            display: true,
+            text: 'Number of Patients Seen per Month'
+          }
+        }
       }
     });
   </script>

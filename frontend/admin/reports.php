@@ -2,70 +2,98 @@
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
-// Include your database connection
+
 include '../../backend/db_connect.php';
 session_start();
 
+// require admin login
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-  header("Location: /../frontend/login.html");
+  header("Location: ../login.html");
   exit;
 }
 
 // Initialize counters
 $totalPatients = $totalDoctors = $totalAppointments = $completedAppointments = 0;
 $recentAppointments = [];
-$monthlyAppointments = array_fill(1, 12, 0); // Default 12 months
+$monthlyAppointments = array_fill(1, 12, 0); // keys 1..12
 
 // Fetch total patients
-$result = $conn->query("SELECT COUNT(*) AS total FROM patients");
-if ($result && $row = $result->fetch_assoc()) {
-  $totalPatients = $row['total'];
+$res = $conn->query("SELECT COUNT(*) AS total FROM patients");
+if ($res) {
+  $row = $res->fetch_assoc();
+  $totalPatients = (int)($row['total'] ?? 0);
+} else {
+  error_log("Patients count error: " . $conn->error);
 }
 
 // Fetch total doctors
-$result = $conn->query("SELECT COUNT(*) AS total FROM doctors");
-if ($result && $row = $result->fetch_assoc()) {
-  $totalDoctors = $row['total'];
+$res = $conn->query("SELECT COUNT(*) AS total FROM doctors");
+if ($res) {
+  $row = $res->fetch_assoc();
+  $totalDoctors = (int)($row['total'] ?? 0);
+} else {
+  error_log("Doctors count error: " . $conn->error);
 }
 
 // Fetch total appointments
-$result = $conn->query("SELECT COUNT(*) AS total FROM appointments");
-if ($result && $row = $result->fetch_assoc()) {
-  $totalAppointments = $row['total'];
+$res = $conn->query("SELECT COUNT(*) AS total FROM appointments");
+if ($res) {
+  $row = $res->fetch_assoc();
+  $totalAppointments = (int)($row['total'] ?? 0);
+} else {
+  error_log("Appointments count error: " . $conn->error);
 }
 
-// Fetch completed appointments
-$result = $conn->query("SELECT COUNT(*) AS total FROM appointments WHERE status='Completed'");
-if ($result && $row = $result->fetch_assoc()) {
-  $completedAppointments = $row['total'];
+// Fetch completed appointments (case-insensitive)
+$res = $conn->query("SELECT COUNT(*) AS total FROM appointments WHERE LOWER(status) = 'completed'");
+if ($res) {
+  $row = $res->fetch_assoc();
+  $completedAppointments = (int)($row['total'] ?? 0);
+} else {
+  error_log("Completed count error: " . $conn->error);
 }
 
-// Fetch monthly appointment data
-$result = $conn->query("
+// Fetch monthly appointment data for current year
+$res = $conn->query("
   SELECT MONTH(appointment_date) AS month, COUNT(*) AS total
   FROM appointments
   WHERE YEAR(appointment_date) = YEAR(CURDATE())
   GROUP BY MONTH(appointment_date)
 ");
-if ($result) {
-  while ($row = $result->fetch_assoc()) {
-    $monthlyAppointments[(int)$row['month']] = (int)$row['total'];
+if ($res) {
+  while ($row = $res->fetch_assoc()) {
+    $m = (int)$row['month'];
+    if ($m >= 1 && $m <= 12) {
+      $monthlyAppointments[$m] = (int)$row['total'];
+    }
   }
+} else {
+  error_log("Monthly query error: " . $conn->error);
 }
 
-// Fetch recent 10 appointments
-$result = $conn->query("
-  SELECT a.appointment_date, p.full_name AS patient, d.full_name AS doctor, a.status
-  FROM appointments a
-  LEFT JOIN patients p ON a.id = p.id
-  LEFT JOIN doctors d ON a.id = d.id
-  ORDER BY a.appointment_date DESC
+// Build ordered array for JS (Jan..Dec)
+$monthlyOrdered = [];
+for ($m = 1; $m <= 12; $m++) {
+  $monthlyOrdered[] = $monthlyAppointments[$m] ?? 0;
+}
+
+// Fetch recent 10 appointments (use patient_name/doctor_name columns from your schema)
+$res = $conn->query("
+  SELECT appointment_date,
+         appointment_time,
+         patient_name,
+         doctor_name,
+         status
+  FROM appointments
+  ORDER BY appointment_date DESC, appointment_time DESC
   LIMIT 10
 ");
-if ($result) {
-  while ($row = $result->fetch_assoc()) {
+if ($res) {
+  while ($row = $res->fetch_assoc()) {
     $recentAppointments[] = $row;
   }
+} else {
+  error_log("Recent appointments query error: " . $conn->error);
 }
 ?>
 <!DOCTYPE html>
@@ -96,28 +124,26 @@ if ($result) {
   <main class="main">
     <div class="topbar">
       <h2>System Reports</h2>
-      <div class="topbar-right">
-        
-      </div>
+      <div class="topbar-right"></div>
     </div>
 
     <!-- ===== Summary Cards ===== -->
     <section class="summary-cards">
       <div class="card patients">
         <h3>Total Patients</h3>
-        <p id="totalPatients"><?= $totalPatients ?></p>
+        <p id="totalPatients"><?= (int)$totalPatients ?></p>
       </div>
       <div class="card doctors">
         <h3>Total Doctors</h3>
-        <p id="totalDoctors"><?= $totalDoctors ?></p>
+        <p id="totalDoctors"><?= (int)$totalDoctors ?></p>
       </div>
       <div class="card appointments">
         <h3>Total Appointments</h3>
-        <p id="totalAppointments"><?= $totalAppointments ?></p>
+        <p id="totalAppointments"><?= (int)$totalAppointments ?></p>
       </div>
       <div class="card completed">
         <h3>Completed</h3>
-        <p id="completedAppointments"><?= $completedAppointments ?></p>
+        <p id="completedAppointments"><?= (int)$completedAppointments ?></p>
       </div>
     </section>
 
@@ -134,6 +160,7 @@ if ($result) {
         <thead>
           <tr>
             <th>Date</th>
+            <th>Time</th>
             <th>Patient</th>
             <th>Doctor</th>
             <th>Status</th>
@@ -143,14 +170,15 @@ if ($result) {
           <?php if (!empty($recentAppointments)): ?>
             <?php foreach ($recentAppointments as $appointment): ?>
               <tr>
-                <td><?= htmlspecialchars($appointment['appointment_date']) ?></td>
-                <td><?= htmlspecialchars($appointment['patient']) ?></td>
-                <td><?= htmlspecialchars($appointment['doctor']) ?></td>
-                <td><?= htmlspecialchars($appointment['status']) ?></td>
+                <td><?= htmlspecialchars($appointment['appointment_date'] ?? '') ?></td>
+                <td><?= htmlspecialchars($appointment['appointment_time'] ?? '') ?></td>
+                <td><?= htmlspecialchars($appointment['patient_name'] ?? '') ?></td>
+                <td><?= htmlspecialchars($appointment['doctor_name'] ?? '') ?></td>
+                <td><?= htmlspecialchars($appointment['status'] ?? '') ?></td>
               </tr>
             <?php endforeach; ?>
           <?php else: ?>
-            <tr><td colspan="4">No recent appointments found.</td></tr>
+            <tr><td colspan="5">No recent appointments found.</td></tr>
           <?php endif; ?>
         </tbody>
       </table>
@@ -158,24 +186,15 @@ if ($result) {
   </main>
 
   <script>
-    // Convert PHP monthly data to JS array
-    const monthlyAppointments = <?= json_encode(array_values($monthlyAppointments)) ?>;
+    const monthlyAppointments = <?= json_encode($monthlyOrdered) ?>;
     const ctx = document.getElementById('appointmentsChart').getContext('2d');
     new Chart(ctx, {
       type: 'bar',
       data: {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-        datasets: [{
-          label: 'Appointments',
-          data: monthlyAppointments,
-          backgroundColor: '#1b88ee'
-        }]
+        labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+        datasets: [{ label: 'Appointments', data: monthlyAppointments, backgroundColor: '#1b88ee' }]
       },
-      options: {
-        responsive: true,
-        plugins: { legend: { display: false } },
-        scales: { y: { beginAtZero: true } }
-      }
+      options: { responsive: true, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
     });
   </script>
 </body>

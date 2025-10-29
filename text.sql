@@ -15,7 +15,7 @@ CREATE TABLE patients (
   full_name VARCHAR(100) NOT NULL,
   email VARCHAR(100) NOT NULL,
   password VARCHAR(255),
-  age INT NOT NULL,
+  d_o_b DATE NOT NULL,
   gender VARCHAR(20) NOT NULL,
   blood_group VARCHAR(10) NOT NULL,
   phone VARCHAR(20) NOT NULL,
@@ -25,11 +25,11 @@ CREATE TABLE patients (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 --values for patient
-INSERT INTO patients (full_name, email, password, age, gender, blood_group, phone, address, doctor)
+INSERT INTO patients (full_name, email, password, d_o_b, gender, blood_group, phone, address, doctor)
 VALUES
-('Alice Williams', 'alice.williams@example.com', MD5('password123'), 30, 'Female', 'A+', '123-456-7890', '123 Main St, Anytown, USA', 'Dr. John Smith'),
-('Bob Johnson', 'bob.johnson@example.com', MD5('password123'), 40, 'Male', 'B+', '123-456-7891', '456 Elm St, Anytown, USA', 'Dr. Emily Johnson'),
-('Charlie Brown', 'charlie.brown@example.com', MD5('password123'), 35, 'Male', 'O+', '123-456-7892', '789 Oak St, Anytown, USA', 'Dr. Michael Brown');
+('Alice Williams', 'alice.williams@example.com', MD5('password123'), '1993-05-15', 'Female', 'A+', '123-456-7890', '123 Main St, Anytown, USA', 'Dr. John Smith'),
+('Bob Johnson', 'bob.johnson@example.com', MD5('password123'), '1983-08-20', 'Male', 'B+', '123-456-7891', '456 Elm St, Anytown, USA', 'Dr. Emily Johnson'),
+('Charlie Brown', 'charlie.brown@example.com', MD5('password123'), '1988-12-10', 'Male', 'O+', '123-456-7892', '789 Oak St, Anytown, USA', 'Dr. Michael Brown');
 
 -- doctors table
 CREATE TABLE doctors (
@@ -37,7 +37,7 @@ CREATE TABLE doctors (
   full_name VARCHAR(100) NOT NULL,
   email VARCHAR(100) NOT NULL,
   password VARCHAR(255),
-  age INT NOT NULL,
+  d_o_b DATE NOT NULL,
   gender VARCHAR(20) NOT NULL,
   department VARCHAR(100) NOT NULL,
   phone VARCHAR(20) NOT NULL,
@@ -48,17 +48,15 @@ CREATE TABLE doctors (
 );
 
 --Values for doctors table
-INSERT INTO doctors (full_name, email, password, age, gender, department, phone, address, status)
+INSERT INTO doctors (full_name, email, password, d_o_b, gender, department, phone, address, status)
 VALUES
-('Dr. John Smith', 'john.smith@example.com', MD5('password123'), 45, 'Male', 'Cardiology', '123-456-7890', '123 Main St, Anytown, USA', 'On Call'),
-('Dr. Emily Johnson', 'emily.johnson@example.com', MD5('password123'), 38, 'Female', 'Neurology', '123-456-7891', '456 Elm St, Anytown, USA', 'On Call'),
-('Dr. Michael Brown', 'michael.brown@example.com', MD5('password123'), 50, 'Male', 'Orthopedics', '123-456-7892', '789 Oak St, Anytown, USA', 'On Call');
+('Dr. John Smith', 'john.smith@example.com', MD5('password123'), '1978-01-15', 'Male', 'Cardiology', '123-456-7890', '123 Main St, Anytown, USA', 'On Call'),
+('Dr. Emily Johnson', 'emily.johnson@example.com', MD5('password123'), '1985-03-22', 'Female', 'Neurology', '123-456-7891', '456 Elm St, Anytown, USA', 'On Call'),
+('Dr. Michael Brown', 'michael.brown@example.com', MD5('password123'), '1973-07-30', 'Male', 'Orthopedics', '123-456-7892', '789 Oak St, Anytown, USA', 'On Call');
 
 -- Table for appointments
 CREATE TABLE appointments (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    patient_id INT,
-    doctor_id INT,
     patient_name VARCHAR(100) NOT NULL,
     patient_email VARCHAR(100) NOT NULL,
     doctor_name VARCHAR(100) NOT NULL,
@@ -66,9 +64,7 @@ CREATE TABLE appointments (
     appointment_time TIME,
     description VARCHAR(255),
     status VARCHAR(100) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (patient_id) REFERENCES patients(id),
-    FOREIGN KEY (doctor_id) REFERENCES doctors(id)
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- values for appointment table

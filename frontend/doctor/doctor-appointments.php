@@ -1,10 +1,12 @@
 <?php
 session_start();
-if (!isset($_SESSION['user_id'])) {
-  header("Location: ../frontend/login.php");
+
+// require doctor login and role
+if (!isset($_SESSION['user_id']) || ($_SESSION['role'] ?? '') !== 'doctor') {
+  header("Location: ../../frontend/login.html");
   exit();
 }
-$doctor_id = $_SESSION['user_id'];
+$doctor_id = (int) ($_SESSION['user_id'] ?? 0);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -59,40 +61,67 @@ $doctor_id = $_SESSION['user_id'];
   </div>
 
   <script>
-    const doctorId = <?php echo json_encode($doctor_id); ?>;
+    const doctorId = <?= json_encode((int)$doctor_id); ?>;
     const tableBody = document.querySelector("#appointmentTable tbody");
     const searchInput = document.getElementById("searchInput");
 
+    // helper to create cell with text (prevents HTML injection)
+    function tdText(text) {
+      const td = document.createElement('td');
+      td.textContent = text ?? '';
+      return td;
+    }
+
     // Fetch doctor appointments
     async function loadAppointments() {
-      const res = await fetch("../../backend/get_appointments.php?doctor_id=" + doctorId);
-      const data = await res.json();
-      tableBody.innerHTML = "";
+      try {
+        const res = await fetch("../../backend/get_appointments.php?doctor_id=" + encodeURIComponent(doctorId));
+        if (!res.ok) throw new Error('Network response was not ok: ' + res.status);
+        const data = await res.json();
+        tableBody.innerHTML = "";
 
-      if (data.length === 0) {
-        tableBody.innerHTML = `<tr><td colspan='6' style='text-align:center;'>No appointments found.</td></tr>`;
-        return;
+        if (!Array.isArray(data) || data.length === 0) {
+          tableBody.innerHTML = `<tr><td colspan='6' style='text-align:center;'>No appointments found.</td></tr>`;
+          return;
+        }
+
+        data.forEach(app => {
+          const row = document.createElement("tr");
+
+          row.appendChild(tdText(app.patient_name));
+          row.appendChild(tdText(app.date));
+          row.appendChild(tdText(app.time));
+
+          const statusText = app.status ?? '';
+          const statusTd = document.createElement('td');
+          const statusSpan = document.createElement('span');
+          statusSpan.className = 'status ' + (typeof statusText === 'string' ? statusText.toLowerCase() : '');
+          statusSpan.textContent = statusText;
+          statusTd.appendChild(statusSpan);
+          row.appendChild(statusTd);
+
+          row.appendChild(tdText(app.notes || '—'));
+
+          const actionsTd = document.createElement('td');
+          const select = document.createElement('select');
+          select.className = 'status-select';
+          select.dataset.id = String(app.id || '');
+          ['Pending','Ongoing','Cancelled','Finished'].forEach(s => {
+            const opt = document.createElement('option');
+            opt.value = s;
+            opt.textContent = s;
+            if (String(app.status) === s) opt.selected = true;
+            select.appendChild(opt);
+          });
+          actionsTd.appendChild(select);
+          row.appendChild(actionsTd);
+
+          tableBody.appendChild(row);
+        });
+      } catch (err) {
+        console.error(err);
+        tableBody.innerHTML = `<tr><td colspan='6' style='text-align:center;color:#b00;'>Failed to load appointments.</td></tr>`;
       }
-
-      data.forEach(app => {
-        const row = document.createElement("tr");
-        row.innerHTML = `
-          <td>${app.patient_name}</td>
-          <td>${app.date}</td>
-          <td>${app.time}</td>
-          <td><span class="status ${app.status.toLowerCase()}">${app.status}</span></td>
-          <td>${app.notes || "—"}</td>
-          <td>
-            <select class="status-select" data-id="${app.id}">
-              <option value="Pending" ${app.status === "Pending" ? "selected" : ""}>Pending</option>
-              <option value="Ongoing" ${app.status === "Ongoing" ? "selected" : ""}>Ongoing</option>
-              <option value="Cancelled" ${app.status === "Cancelled" ? "selected" : ""}>Cancelled</option>
-              <option value="Finished" ${app.status === "Finished" ? "selected" : ""}>Finished</option>
-            </select>
-          </td>
-        `;
-        tableBody.appendChild(row);
-      });
     }
 
     loadAppointments();
@@ -102,7 +131,7 @@ $doctor_id = $_SESSION['user_id'];
       const filter = searchInput.value.toLowerCase();
       const rows = tableBody.getElementsByTagName("tr");
       for (let row of rows) {
-        const name = row.children[0].innerText.toLowerCase();
+        const name = (row.children[0]?.innerText || '').toLowerCase();
         row.style.display = name.includes(filter) ? "" : "none";
       }
     });
@@ -113,15 +142,23 @@ $doctor_id = $_SESSION['user_id'];
         const id = e.target.dataset.id;
         const newStatus = e.target.value;
 
-        await fetch("../../backend/update_appointment.php", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ id, status: newStatus })
-        });
-
-        const statusSpan = e.target.closest("tr").querySelector(".status");
-        statusSpan.textContent = newStatus;
-        statusSpan.className = "status " + newStatus.toLowerCase();
+        try {
+          const res = await fetch("../../backend/update_appointment.php", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id, status: newStatus })
+          });
+          if (!res.ok) throw new Error('Update failed: ' + res.status);
+          // reflect change in UI
+          const statusSpan = e.target.closest("tr").querySelector(".status");
+          if (statusSpan) {
+            statusSpan.textContent = newStatus;
+            statusSpan.className = "status " + newStatus.toLowerCase();
+          }
+        } catch (err) {
+          console.error(err);
+          alert('Unable to update status. Check console for details.');
+        }
       }
     });
   </script>

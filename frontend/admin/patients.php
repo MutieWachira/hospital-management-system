@@ -36,6 +36,13 @@ if (!empty($search)) {
 $stmt->execute();
 $result = $stmt->get_result();
 
+//function to calculate age from date of birth
+function calculateAge($dob) {
+  $today = new DateTime();
+  $birthDate = new DateTime($dob);
+  return $today->diff($birthDate)->y;
+}
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -86,6 +93,7 @@ $result = $stmt->get_result();
             <tr>
               <th>Full Name</th>
               <th>Email</th>
+              <th>Date of Birth</th>
               <th>Age</th>
               <th>Gender</th>
               <th>Phone</th>
@@ -100,7 +108,8 @@ $result = $stmt->get_result();
                 echo "<tr>
                         <td>" . htmlspecialchars($row['full_name']) . "</td>
                         <td>" . htmlspecialchars($row['email']) . "</td>
-                        <td>" . htmlspecialchars($row['age']) . "</td>
+                        <td>" . htmlspecialchars($row['d_o_b']) . "</td>
+                        <td>" . calculateAge($row['d_o_b']) . " years</td>
                         <td>" . htmlspecialchars($row['gender']) . "</td>
                         <td>" . htmlspecialchars($row['phone']) . "</td>
                         <td>" . htmlspecialchars($row['doctor']) . "</td>

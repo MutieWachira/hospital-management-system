@@ -29,7 +29,7 @@ if (!$patient) {
 // When form is submitted
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $fullName = $_POST['patientName'];
-    $age = $_POST['age'];
+    $date_of_birth = $_POST['d_o_b'];
     $gender = $_POST['gender'];
     $bloodGroup = $_POST['bloodGroup'];
     $phone = $_POST['phone'];
@@ -58,15 +58,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         // Update patient info + password
         $stmt = $conn->prepare("UPDATE patients 
-            SET full_name=?, age=?, gender=?, blood_group=?, phone=?, address=?, doctor=?, password=? 
+            SET full_name=?, d_o_b=?, gender=?, blood_group=?, phone=?, address=?, doctor=?, password=? 
             WHERE id=?");
-        $stmt->bind_param('sissssssi', $fullName, $age, $gender, $bloodGroup, $phone, $address, $doctor, $hashedPassword, $id);
+        $stmt->bind_param('ssssssssi', $fullName, $date_of_birth, $gender, $bloodGroup, $phone, $address, $doctor, $hashedPassword, $id);
     } else {
         // Update patient info only (no password change)
         $stmt = $conn->prepare("UPDATE patients 
-            SET full_name=?, age=?, gender=?, blood_group=?, phone=?, address=?, doctor=? 
+            SET full_name=?, d_o_b=?, gender=?, blood_group=?, phone=?, address=?, doctor=? 
             WHERE id=?");
-        $stmt->bind_param('sisssssi', $fullName, $age, $gender, $bloodGroup, $phone, $address, $doctor, $id);
+        $stmt->bind_param('sssssssi', $fullName, $date_of_birth, $gender, $bloodGroup, $phone, $address, $doctor, $id);
     }
 
     if ($stmt->execute()) {
@@ -121,9 +121,10 @@ $conn->close();
           </div>
 
           <div class="form-group">
-            <label>Age:</label>
-            <input type="number" name="age" value="<?= htmlspecialchars($patient['age']) ?>" required>
+            <label for="dob">Date of Birth</label>
+            <input type="date" id="dob" name="d_o_b" value="<?= htmlspecialchars($patient['d_o_b']) ?>" required>
           </div>
+
 
           <div class="form-group">
             <label>Gender:</label>

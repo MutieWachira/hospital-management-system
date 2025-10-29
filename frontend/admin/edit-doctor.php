@@ -6,42 +6,52 @@ error_reporting(E_ALL);
 session_start();
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-  header("Location: /../frontend/login.html");
+  header("Location: ../login.html");
   exit;
 }
 
-$id = $_GET['id'] ?? null;
-if (!$id) {
+$id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+if ($id <= 0) {
     die("No doctor selected.");
 }
 
-// ✅ Load doctor data
+//  Load doctor data
 $stmt = $conn->prepare("SELECT * FROM doctors WHERE id=?");
+if (!$stmt) {
+    die("Prepare failed: " . $conn->error);
+}
 $stmt->bind_param("i", $id);
 $stmt->execute();
 $result = $stmt->get_result();
 $doctor = $result->fetch_assoc();
+$stmt->close();
 
 if (!$doctor) {
     die("Doctor not found.");
 }
 
-// ✅ When form is submitted
+//  When form is submitted
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $fullName = $_POST['doctorName'];
-    $email = $_POST['email'];
-    $age = $_POST['age'];
-    $gender = $_POST['gender'];
-    $department = $_POST['department'];
-    $phone = $_POST['phone'];
-    $address = $_POST['address'];
-    $status = $_POST['status'];
+    $fullName = trim($_POST['doctorName'] ?? '');
+    $email = trim($_POST['email'] ?? '');
+    $date_of_birth = trim($_POST['d_o_b'] ?? ''); // use d_o_b (DATE) column
+    $gender = trim($_POST['gender'] ?? '');
+    $department = trim($_POST['department'] ?? '');
+    $phone = trim($_POST['phone'] ?? '');
+    $address = trim($_POST['address'] ?? '');
+    $status = trim($_POST['status'] ?? '');
 
     $currentPassword = $_POST['current_password'] ?? '';
     $newPassword = $_POST['new_password'] ?? '';
     $confirmPassword = $_POST['confirm_password'] ?? '';
 
-    // ✅ If user wants to change password
+    // basic validation (expand as needed)
+    if ($fullName === '' || $email === '') {
+        echo "<script>alert('Name and email are required.'); window.history.back();</script>";
+        exit;
+    }
+
+    //  If user wants to change password
     if (!empty($currentPassword) || !empty($newPassword) || !empty($confirmPassword)) {
         // Check all password fields
         if (empty($currentPassword) || empty($newPassword) || empty($confirmPassword)) {
@@ -49,8 +59,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             exit;
         }
 
-        // Verify current password
-        if (!password_verify($currentPassword, $doctor['password'])) {
+        // Verify current password (support legacy MD5 and password_hash)
+        $stored = $doctor['password'] ?? '';
+        $current_ok = false;
+        if ($stored !== '') {
+            if (password_verify($currentPassword, $stored)) {
+                $current_ok = true;
+            } elseif (md5($currentPassword) === $stored) {
+                // legacy MD5 match
+                $current_ok = true;
+            }
+        }
+
+        if (!$current_ok) {
             echo "<script>alert('Current password is incorrect.'); window.history.back();</script>";
             exit;
         }
@@ -61,27 +82,39 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             exit;
         }
 
-        // Hash new password
+        // Hash new password (use password_hash for security)
         $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
 
         // Update doctor with password change
         $stmt = $conn->prepare("UPDATE doctors 
-            SET full_name=?, email=?, age=?, gender=?, department=?, phone=?, address=?, status=?, password=?
+            SET full_name=?, email=?, d_o_b=?, gender=?, department=?, phone=?, address=?, status=?, password=?
             WHERE id=?");
-        $stmt->bind_param('ssissssssi', $fullName, $email, $age, $gender, $department, $phone, $address, $status, $hashedPassword, $id);
+        if (!$stmt) {
+            echo "<p>Prepare failed: " . htmlspecialchars($conn->error) . "</p>";
+            exit;
+        }
+        $stmt->bind_param('sssssssssi', $fullName, $email, $date_of_birth, $gender, $department, $phone, $address, $status, $hashedPassword, $id);
     } else {
         // Update doctor without password change
         $stmt = $conn->prepare("UPDATE doctors 
-            SET full_name=?, email=?, age=?, gender=?, department=?, phone=?, address=?, status=?
+            SET full_name=?, email=?, d_o_b=?, gender=?, department=?, phone=?, address=?, status=?
             WHERE id=?");
-        $stmt->bind_param('ssisssssi', $fullName, $email, $age, $gender, $department, $phone, $address, $status, $id);
+        if (!$stmt) {
+            echo "<p>Prepare failed: " . htmlspecialchars($conn->error) . "</p>";
+            exit;
+        }
+        $stmt->bind_param('ssssssssi', $fullName, $email, $date_of_birth, $gender, $department, $phone, $address, $status, $id);
     }
 
     // Execute update
     if ($stmt->execute()) {
+        $stmt->close();
         echo "<script>alert('Doctor updated successfully!'); window.location='doctor.php';</script>";
+        exit;
     } else {
-        echo "<p>Error updating doctor: " . $stmt->error . "</p>";
+        $err = $stmt->error;
+        $stmt->close();
+        echo "<p>Error updating doctor: " . htmlspecialchars($err) . "</p>";
     }
 }
 ?>
@@ -116,53 +149,53 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <form method="POST">
           <div class="form-group">
             <label>Full Name:</label>
-            <input type="text" name="doctorName" value="<?= htmlspecialchars($doctor['full_name']) ?>" required>
+            <input type="text" name="doctorName" value="<?= htmlspecialchars($doctor['full_name'] ?? '') ?>" required>
           </div>
 
           <div class="form-group">
             <label>Email:</label>
-            <input type="email" name="email" value="<?= htmlspecialchars($doctor['email']) ?>" required>
+            <input type="email" name="email" value="<?= htmlspecialchars($doctor['email'] ?? '') ?>" required>
           </div>
 
           <div class="form-group">
-            <label>Age:</label>
-            <input type="number" name="age" value="<?= htmlspecialchars($doctor['age']) ?>" required>
+            <label>Date of Birth:</label>
+            <input type="date" name="d_o_b" value="<?= htmlspecialchars($doctor['d_o_b'] ?? '') ?>" required>
           </div>
 
           <div class="form-group">
             <label>Gender:</label>
             <select name="gender" required>
-              <option <?= $doctor['gender']=='Male'?'selected':'' ?>>Male</option>
-              <option <?= $doctor['gender']=='Female'?'selected':'' ?>>Female</option>
-              <option <?= $doctor['gender']=='Other'?'selected':'' ?>>Other</option>
+              <option value="Male" <?= ($doctor['gender'] ?? '')=='Male'?'selected':'' ?>>Male</option>
+              <option value="Female" <?= ($doctor['gender'] ?? '')=='Female'?'selected':'' ?>>Female</option>
+              <option value="Other" <?= ($doctor['gender'] ?? '')=='Other'?'selected':'' ?>>Other</option>
             </select>
           </div>
 
           <div class="form-group">
             <label>Department:</label>
-            <input type="text" name="department" value="<?= htmlspecialchars($doctor['department']) ?>" required>
+            <input type="text" name="department" value="<?= htmlspecialchars($doctor['department'] ?? '') ?>" required>
           </div>
 
           <div class="form-group">
             <label>Phone Number:</label>
-            <input type="text" name="phone" value="<?= htmlspecialchars($doctor['phone']) ?>" required>
+            <input type="text" name="phone" value="<?= htmlspecialchars($doctor['phone'] ?? '') ?>" required>
           </div>
 
           <div class="form-group">
             <label>Address:</label>
-            <input type="text" name="address" value="<?= htmlspecialchars($doctor['address']) ?>" required>
+            <input type="text" name="address" value="<?= htmlspecialchars($doctor['address'] ?? '') ?>" required>
           </div>
 
           <div class="form-group">
             <label>Status:</label>
             <select name="status" required>
-              <option <?= $doctor['status']=='OnCall'?'selected':'' ?>>On Call</option>
-              <option <?= $doctor['status']=='OffCall'?'selected':'' ?>>Off Call</option>
-              <option <?= $doctor['status']=='Leave'?'selected':'' ?>>Leave</option>
+              <option value="On Call" <?= ($doctor['status'] ?? '')=='On Call'?'selected':'' ?>>On Call</option>
+              <option value="Off Call" <?= ($doctor['status'] ?? '')=='Off Call'?'selected':'' ?>>Off Call</option>
+              <option value="Leave" <?= ($doctor['status'] ?? '')=='Leave'?'selected':'' ?>>Leave</option>
             </select>
           </div>
 
-          <!-- ✅ Password Update Section -->
+          <!-- Password Update Section -->
           <h3 style="margin-top:20px;">Change Password (Optional)</h3>
           <br>
 

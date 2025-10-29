@@ -21,6 +21,14 @@ $stmt = $conn->prepare($query);
 $stmt->bind_param("i", $doctor_id);
 $stmt->execute();
 $result = $stmt->get_result();
+
+
+//function to calculate age from date of birth
+function calculateAge($dob) {
+  $today = new DateTime();
+  $birthDate = new DateTime($dob);
+  return $today->diff($birthDate)->y;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -58,6 +66,7 @@ $result = $stmt->get_result();
           <tr>
             <th>Name</th>
             <th>Email</th>
+            <th>Date of Birth</th>
             <th>Age</th>
             <th>Gender</th>
             <th>Action</th>
@@ -69,7 +78,8 @@ $result = $stmt->get_result();
               <tr>
                 <td><?= htmlspecialchars($row['full_name']); ?></td>
                 <td><?= htmlspecialchars($row['email']); ?></td>
-                <td><?= htmlspecialchars($row['age']); ?></td>
+                <td><?= htmlspecialchars($row['d_o_b']); ?></td>
+                <td><?= calculateAge($row['d_o_b']) . " years"; ?></td>
                 <td><?= htmlspecialchars($row['gender']); ?></td>
                 <td>
                   <a href="doctor-patient-details.php?id=<?= $row['id']; ?>" class="view-btn">View</a>

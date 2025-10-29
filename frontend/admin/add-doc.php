@@ -63,8 +63,8 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
           </div>
 
           <div class="form-group">
-            <label for="age">Age:</label>
-            <input type="number" id="age" name="age" placeholder="Enter age" required />
+            <label for="dob">Date of Birth</label>
+            <input type="date" id="dob" name="date_of_birth" required>
           </div>
 
           <div class="form-group">

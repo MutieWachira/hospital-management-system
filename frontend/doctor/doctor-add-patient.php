@@ -4,7 +4,7 @@ ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
 session_start();
-// require doctor login
+// Require doctor login
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'doctor') {
     header('Location: ../../frontend/login.html');
     exit;
@@ -18,14 +18,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // collect + sanitize
     $fullname = trim($_POST['fullname'] ?? '');
     $email = trim($_POST['email'] ?? '');
-    $age = (int)($_POST['age'] ?? 0);
+    $dob = trim($_POST['date_of_birth'] ?? '');
     $gender = trim($_POST['gender'] ?? '');
     $phone = trim($_POST['phone'] ?? '');
     $address = trim($_POST['address'] ?? '');
     $blood_group = trim($_POST['blood_group'] ?? '');
 
+    // calculate age automatically
+    $age = 0;
+    if (!empty($dob)) {
+        $dobDate = new DateTime($dob);
+        $today = new DateTime();
+        $age = $today->diff($dobDate)->y;
+    }
+
     // basic validation
-    if ($fullname === '' || $email === '' || $age <= 0 || $gender === '' || $phone === '' || $address === '') {
+    if ($fullname === '' || $email === '' || empty($dob) || $gender === '' || $phone === '' || $address === '') {
         $error = "Please fill in all required fields.";
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $error = "Invalid email address.";
@@ -40,21 +48,27 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $check->close();
         } else {
             $check->close();
-            // Insert patient record (include doctor column)
-            $sql = "INSERT INTO patients (full_name, email, age, gender, phone, address, blood_group, doctor, role, created_at)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'patient', NOW())";
+
+            // Extract first name from full name for default password
+            $firstName = explode(' ', trim($fullname))[0];
+            $defaultPassword = $firstName; // e.g., if full_name = "John Doe", password = "John"
+            $hashedPassword = password_hash($defaultPassword, PASSWORD_DEFAULT);
+
+            // Insert patient record (include doctor + dob + password)
+            $sql = "INSERT INTO patients (full_name, email, gender, d_o_b, phone, address, blood_group, doctor, password, role, created_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'patient', NOW())";
             $stmt = $conn->prepare($sql);
             if (!$stmt) {
                 $error = "Prepare failed: " . $conn->error;
             } else {
-                // bind types: s (fullname), s (email), i (age), s (gender), s (phone), s (address), s (blood_group), s (doctor)
-                $stmt->bind_param("ssisssss", $fullname, $email, $age, $gender, $phone, $address, $blood_group, $doctor_name);
+                // bind types: s (fullname), s (email), s (gender), s (dob), s (phone), s (address), s (blood), s (doctor), s (password)
+                $stmt->bind_param("sssssssss", $fullname, $email, $gender, $dob, $phone, $address, $blood_group, $doctor_name, $hashedPassword);
 
                 if ($stmt->execute()) {
-                    $success = "Patient added successfully!";
-                    // redirect to patients list (optional)
-                    header("Location: doctor-patients.php?added=1");
-                    exit;
+                    $success = "Patient added successfully! Default password: <strong>$defaultPassword</strong>";
+                    // Optional redirect
+                    // header("Location: doctor-patients.php?added=1");
+                    // exit;
                 } else {
                     $error = "Database error: " . $stmt->error;
                 }
@@ -87,7 +101,6 @@ $conn->close();
         <li><a href="doctor-profile.php">Profile</a></li>
         <li><a href="doctor-reports.php">Reports</a></li>
         <li class="logout"><a href="../../backend/logout.php">Logout</a></li>
-        
       </ul>
     </aside>
 
@@ -99,9 +112,9 @@ $conn->close();
 
       <section class="form-section">
         <?php if (!empty($error)): ?>
-          <p class="error"><?php echo $error; ?></p>
+          <p class="error"><?= $error ?></p>
         <?php elseif (!empty($success)): ?>
-          <p class="success"><?php echo $success; ?></p>
+          <p class="success"><?= $success ?></p>
         <?php endif; ?>
 
         <form method="POST" class="add-patient-form">
@@ -116,8 +129,8 @@ $conn->close();
           </div>
 
           <div class="form-group">
-            <label>Age</label>
-            <input type="number" name="age" placeholder="Enter age" required />
+            <label>Date of Birth</label>
+            <input type="date" name="date_of_birth" required />
           </div>
 
           <div class="form-group">

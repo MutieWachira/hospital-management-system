@@ -5,28 +5,84 @@ error_reporting(E_ALL);
 include '../../backend/db_connect.php';
 session_start();
 
-if (!isset($_SESSION['user_id'])) {
-  header("Location: /../frontend/login.html");
+if (!isset($_SESSION['user_id']) || ($_SESSION['role'] ?? '') !== 'admin') {
+  // use a relative redirect from frontend/admin to frontend/login.html
+  header("Location: ../login.html");
   exit();
 }
 
 // ===== Fetch Counts =====
-$totalPatients = $conn->query("SELECT COUNT(*) AS total FROM patients")->fetch_assoc()['total'] ?? 0;
-$totalDoctors = $conn->query("SELECT COUNT(*) AS total FROM doctors")->fetch_assoc()['total'] ?? 0;
-$totalAppointments = $conn->query("SELECT COUNT(*) AS total FROM appointments")->fetch_assoc()['total'] ?? 0;
-$completedAppointments = $conn->query("SELECT COUNT(*) AS total FROM appointments WHERE status='Completed'")->fetch_assoc()['total'] ?? 0;
+function fetch_count($conn, $sql) {
+  $res = $conn->query($sql);
+  if (! $res) return 0;
+  $row = $res->fetch_assoc();
+  return (int) ($row['total'] ?? 0);
+}
+
+$totalPatients = fetch_count($conn, "SELECT COUNT(*) AS total FROM patients");
+$totalDoctors = fetch_count($conn, "SELECT COUNT(*) AS total FROM doctors");
+$totalAppointments = fetch_count($conn, "SELECT COUNT(*) AS total FROM appointments");
+$completedAppointments = fetch_count($conn, "SELECT COUNT(*) AS total FROM appointments WHERE LOWER(status) = 'completed'");
 
 // ===== Fetch Doctor Workload (Appointments per Doctor) =====
 $doctorWorkload = [];
-$result = $conn->query("
-  SELECT d.full_name AS doctor_name, COUNT(a.id) AS total_appointments
-  FROM doctors d
-  LEFT JOIN appointments a ON d.id = a.doctor_id
-  GROUP BY d.id
-");
-if ($result) {
-  while ($row = $result->fetch_assoc()) {
-    $doctorWorkload[] = $row;
+
+// detect whether appointments table has a doctor_id FK
+$hasDoctorId = false;
+$colCheck = $conn->query("SHOW COLUMNS FROM appointments LIKE 'doctor_id'");
+if ($colCheck && $colCheck->num_rows > 0) {
+  $hasDoctorId = true;
+}
+
+if ($hasDoctorId) {
+  $result = $conn->query("
+    SELECT d.full_name AS doctor_name, COUNT(a.id) AS total_appointments
+    FROM doctors d
+    LEFT JOIN appointments a ON d.id = a.doctor_id
+    GROUP BY d.id
+    ORDER BY total_appointments DESC
+  ");
+  if ($result) {
+    while ($row = $result->fetch_assoc()) {
+      $doctorWorkload[] = [
+        'doctor_name' => $row['doctor_name'] ?? '—',
+        'total_appointments' => (int)($row['total_appointments'] ?? 0)
+      ];
+    }
+  } else {
+    error_log("Doctor workload query failed: " . $conn->error);
+  }
+} else {
+  // appointments table only stores doctor_name — count by matching full_name
+  $docRes = $conn->query("SELECT full_name FROM doctors");
+  if ($docRes) {
+    while ($doc = $docRes->fetch_assoc()) {
+      $dname = $doc['full_name'];
+      $cstmt = $conn->prepare("SELECT COUNT(*) AS cnt FROM appointments WHERE doctor_name = ?");
+      if ($cstmt) {
+        $cstmt->bind_param("s", $dname);
+        $cstmt->execute();
+        $cres = $cstmt->get_result()->fetch_assoc();
+        $count = (int)($cres['cnt'] ?? 0);
+        $cstmt->close();
+      } else {
+        $count = 0;
+      }
+      $doctorWorkload[] = ['doctor_name' => $dname, 'total_appointments' => $count];
+    }
+  } else {
+    // fallback: group by doctor_name from appointments table
+    $gres = $conn->query("SELECT doctor_name, COUNT(*) AS total FROM appointments GROUP BY doctor_name ORDER BY total DESC");
+    if ($gres) {
+      while ($row = $gres->fetch_assoc()) {
+        $doctorWorkload[] = [
+          'doctor_name' => $row['doctor_name'] ?? '—',
+          'total_appointments' => (int)($row['total'] ?? 0)
+        ];
+      }
+    } else {
+      error_log("Fallback doctor workload query failed: " . $conn->error);
+    }
   }
 }
 ?>
