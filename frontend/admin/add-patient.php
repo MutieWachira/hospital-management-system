@@ -15,6 +15,14 @@ if ($result && $result->num_rows > 0) {
     $doctors[] = $row;
   }
 }
+
+require_once '../../backend/email_helper.php';
+
+$subject = "Welcome to HMS";
+$message = "Dear $full_name,\n\nYour account has been created.\nEmail: $email\nPlease log in to access your dashboard.\n\n- HMS Administration";
+sendEmail($email, $subject, $message);
+
+
 $conn->close();
 ?>
 

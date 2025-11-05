@@ -78,6 +78,8 @@ VALUES
 CREATE TABLE medical_records (
   id INT AUTO_INCREMENT PRIMARY KEY,
   patient_id INT,
+  patient_name VARCHAR(100),
+  doctor_name VARCHAR(100),
   date DATE,
   diagnosis VARCHAR(255),
   treatment VARCHAR(255),
@@ -89,8 +91,11 @@ CREATE TABLE medical_records (
 CREATE TABLE prescriptions (
   id INT AUTO_INCREMENT PRIMARY KEY,
   patient_id INT,
+  patient_name VARCHAR(100),
+  doctor_name VARCHAR(100),
   drug_name VARCHAR(255),
   dosage VARCHAR(100),
+  price INT(10),
   duration VARCHAR(100)
 );
 

@@ -1,5 +1,6 @@
 <?php
 include('../../backend/db_connect.php');
+require_once('../../backend/email_helper.php'); // Include the email helper
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
 
@@ -11,6 +12,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'doctor') {
 }
 
 $doctor_name = $_SESSION['name'] ?? ''; // use doctor name stored in session
+$doctor_email = $_SESSION['email'] ?? ''; // doctor email (optional use)
 
 $error = $success = '';
 
@@ -51,24 +53,59 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             // Extract first name from full name for default password
             $firstName = explode(' ', trim($fullname))[0];
-            $defaultPassword = $firstName; // e.g., if full_name = "John Doe", password = "John"
+            $defaultPassword = $firstName; // default password = first name
             $hashedPassword = password_hash($defaultPassword, PASSWORD_DEFAULT);
 
-            // Insert patient record (include doctor + dob + password)
+            // Insert patient record
             $sql = "INSERT INTO patients (full_name, email, gender, d_o_b, phone, address, blood_group, doctor, password, role, created_at)
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'patient', NOW())";
             $stmt = $conn->prepare($sql);
             if (!$stmt) {
                 $error = "Prepare failed: " . $conn->error;
             } else {
-                // bind types: s (fullname), s (email), s (gender), s (dob), s (phone), s (address), s (blood), s (doctor), s (password)
                 $stmt->bind_param("sssssssss", $fullname, $email, $gender, $dob, $phone, $address, $blood_group, $doctor_name, $hashedPassword);
 
                 if ($stmt->execute()) {
                     $success = "Patient added successfully! Default password: <strong>$defaultPassword</strong>";
-                    // Optional redirect
-                    // header("Location: doctor-patients.php?added=1");
-                    // exit;
+
+                    /*  Send Welcome Email to Patient */
+                    $subject = "Welcome to Hospital Management System (HMS)";
+                    $message = "
+                    Dear $fullname,
+
+                    You have been registered as a patient under Dr. $doctor_name.
+
+                    Here are your login details:
+                    Email: $email
+                    Default Password: $defaultPassword
+
+                    Please log in and change your password after your first login.
+
+                    Regards,
+                    Hospital Management System (HMS)
+                    ";
+
+                    sendEmail($email, $subject, $message);
+
+                    /* Optional: Send confirmation to the doctor */
+                    if (!empty($doctor_email)) {
+                        $doctorSubject = "New Patient Added Successfully";
+                        $doctorMessage = "
+                        Dear Dr. $doctor_name,
+
+                        You have successfully added a new patient to your list.
+
+                        Patient Name: $fullname
+                        Email: $email
+                        Blood Group: $blood_group
+                        Phone: $phone
+
+                        Regards,
+                        Hospital Management System
+                        ";
+                        sendEmail($doctor_email, $doctorSubject, $doctorMessage);
+                    }
+
                 } else {
                     $error = "Database error: " . $stmt->error;
                 }
@@ -80,7 +117,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 $conn->close();
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>

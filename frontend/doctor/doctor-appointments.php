@@ -1,12 +1,60 @@
 <?php
 session_start();
 
-// require doctor login and role
+// Require doctor login
 if (!isset($_SESSION['user_id']) || ($_SESSION['role'] ?? '') !== 'doctor') {
   header("Location: ../../frontend/login.html");
   exit();
 }
+
 $doctor_id = (int) ($_SESSION['user_id'] ?? 0);
+
+include '../../backend/db_connect.php';
+
+// Fetch doctor's full name
+$doctor_name = '';
+if ($stmt = $conn->prepare("SELECT full_name FROM doctors WHERE id = ?")) {
+  $stmt->bind_param("i", $doctor_id);
+  $stmt->execute();
+  $res = $stmt->get_result();
+  if ($row = $res->fetch_assoc()) {
+    $doctor_name = trim($row['full_name']);
+  }
+  $stmt->close();
+} else {
+  error_log("Prepare failed (doctor lookup): " . $conn->error);
+}
+
+// Fetch appointments for this doctor
+$appointments = [];
+if ($doctor_name !== '') {
+  $sql = "
+      SELECT 
+        id, 
+        patient_name, 
+        patient_email,
+        appointment_date AS date, 
+        appointment_time AS time, 
+        status, 
+        description AS notes
+      FROM appointments
+      WHERE LOWER(TRIM(doctor_name)) = LOWER(TRIM(?))
+      ORDER BY appointment_date DESC, appointment_time DESC
+  ";
+  if ($astmt = $conn->prepare($sql)) {
+    $astmt->bind_param("s", $doctor_name);
+    $astmt->execute();
+    $ares = $astmt->get_result();
+    while ($r = $ares->fetch_assoc()) {
+      $appointments[] = $r;
+    }
+    $astmt->close();
+  } else {
+    error_log("Prepare failed (appointments): " . $conn->error);
+  }
+} else {
+  error_log("Doctor name not found for doctor_id: " . $doctor_id);
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -28,10 +76,9 @@ $doctor_id = (int) ($_SESSION['user_id'] ?? 0);
           <li><a href="doctor-appointments.php" class="active">My Appointments</a></li>
           <li><a href="doctor-profile.php">Profile</a></li>
           <li><a href="doctor-reports.php">Reports</a></li>
-        <li class="logout"><a href="../../backend/logout.php">Logout</a></li>
+          <li class="logout"><a href="../../backend/logout.php">Logout</a></li>
         </ul>
       </div>
-      <a href="../../backend/logout.php" class="logout-btn">Logout</a>
     </aside>
 
     <!-- Main Content -->
@@ -54,79 +101,51 @@ $doctor_id = (int) ($_SESSION['user_id'] ?? 0);
               <th>Actions</th>
             </tr>
           </thead>
-          <tbody></tbody>
+          <tbody>
+            <?php if (!empty($appointments)): ?>
+              <?php foreach ($appointments as $app): ?>
+                <?php
+                  $rawStatus = $app['status'] ?? '';
+                  $statusClass = preg_replace('/[^a-z0-9_-]/', '', strtolower($rawStatus));
+                ?>
+                <tr>
+                  <td><?= htmlspecialchars($app['patient_name']); ?></td>
+                  <td><?= htmlspecialchars($app['date']); ?></td>
+                  <td><?= htmlspecialchars($app['time']); ?></td>
+                  <td><span class="status <?= $statusClass; ?>"><?= htmlspecialchars($rawStatus); ?></span></td>
+                  <td><?= htmlspecialchars($app['notes'] ?? '—'); ?></td>
+                  <td>
+                    <select class="status-select" 
+                            data-id="<?= (int)$app['id']; ?>" 
+                            data-email="<?= htmlspecialchars($app['patient_email']); ?>" 
+                            data-patient="<?= htmlspecialchars($app['patient_name']); ?>"
+                            data-date="<?= htmlspecialchars($app['date']); ?>">
+                      <?php
+                        $options = ['Pending', 'Ongoing', 'Accepted', 'Cancelled', 'Finished'];
+                        $cur = $app['status'] ?? '';
+                        foreach ($options as $opt) {
+                          $sel = (strcasecmp($cur, $opt) === 0) ? 'selected' : '';
+                          echo "<option value=\"" . htmlspecialchars($opt) . "\" $sel>" . htmlspecialchars($opt) . "</option>";
+                        }
+                      ?>
+                    </select>
+                  </td>
+                </tr>
+              <?php endforeach; ?>
+            <?php else: ?>
+              <tr><td colspan="6" style="text-align:center;">No appointments found.</td></tr>
+            <?php endif; ?>
+          </tbody>
         </table>
       </section>
     </main>
   </div>
 
   <script>
-    const doctorId = <?= json_encode((int)$doctor_id); ?>;
     const tableBody = document.querySelector("#appointmentTable tbody");
     const searchInput = document.getElementById("searchInput");
 
-    // helper to create cell with text (prevents HTML injection)
-    function tdText(text) {
-      const td = document.createElement('td');
-      td.textContent = text ?? '';
-      return td;
-    }
-
-    // Fetch doctor appointments
-    async function loadAppointments() {
-      try {
-        const res = await fetch("../../backend/get_appointments.php?doctor_id=" + encodeURIComponent(doctorId));
-        if (!res.ok) throw new Error('Network response was not ok: ' + res.status);
-        const data = await res.json();
-        tableBody.innerHTML = "";
-
-        if (!Array.isArray(data) || data.length === 0) {
-          tableBody.innerHTML = `<tr><td colspan='6' style='text-align:center;'>No appointments found.</td></tr>`;
-          return;
-        }
-
-        data.forEach(app => {
-          const row = document.createElement("tr");
-
-          row.appendChild(tdText(app.patient_name));
-          row.appendChild(tdText(app.date));
-          row.appendChild(tdText(app.time));
-
-          const statusText = app.status ?? '';
-          const statusTd = document.createElement('td');
-          const statusSpan = document.createElement('span');
-          statusSpan.className = 'status ' + (typeof statusText === 'string' ? statusText.toLowerCase() : '');
-          statusSpan.textContent = statusText;
-          statusTd.appendChild(statusSpan);
-          row.appendChild(statusTd);
-
-          row.appendChild(tdText(app.notes || '—'));
-
-          const actionsTd = document.createElement('td');
-          const select = document.createElement('select');
-          select.className = 'status-select';
-          select.dataset.id = String(app.id || '');
-          ['Pending','Ongoing','Cancelled','Finished'].forEach(s => {
-            const opt = document.createElement('option');
-            opt.value = s;
-            opt.textContent = s;
-            if (String(app.status) === s) opt.selected = true;
-            select.appendChild(opt);
-          });
-          actionsTd.appendChild(select);
-          row.appendChild(actionsTd);
-
-          tableBody.appendChild(row);
-        });
-      } catch (err) {
-        console.error(err);
-        tableBody.innerHTML = `<tr><td colspan='6' style='text-align:center;color:#b00;'>Failed to load appointments.</td></tr>`;
-      }
-    }
-
-    loadAppointments();
-
-    // Filter Search
+    // Search filter
     searchInput.addEventListener("keyup", () => {
       const filter = searchInput.value.toLowerCase();
       const rows = tableBody.getElementsByTagName("tr");
@@ -136,31 +155,45 @@ $doctor_id = (int) ($_SESSION['user_id'] ?? 0);
       }
     });
 
-    // Update Status on Change
-    tableBody.addEventListener("change", async (e) => {
-      if (e.target.classList.contains("status-select")) {
-        const id = e.target.dataset.id;
-        const newStatus = e.target.value;
+    // Handle status change
+tableBody.addEventListener("change", async (e) => {
+  if (e.target.classList.contains("status-select")) {
+    const id = e.target.dataset.id;
+    const newStatus = e.target.value;
+    const patientEmail = e.target.dataset.email;
+    const patientName = e.target.dataset.patient;
+    const date = e.target.dataset.date;
+    const row = e.target.closest("tr");
+    const doctorName = "<?= htmlspecialchars($doctor_name); ?>"; // current doctor session name
+    const time = row.children[2]?.innerText || '';
 
-        try {
-          const res = await fetch("../../backend/update_appointment.php", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id, status: newStatus })
-          });
-          if (!res.ok) throw new Error('Update failed: ' + res.status);
-          // reflect change in UI
-          const statusSpan = e.target.closest("tr").querySelector(".status");
-          if (statusSpan) {
-            statusSpan.textContent = newStatus;
-            statusSpan.className = "status " + newStatus.toLowerCase();
-          }
-        } catch (err) {
-          console.error(err);
-          alert('Unable to update status. Check console for details.');
-        }
+    try {
+      const res = await fetch("../../backend/update_appointments.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" },
+        body: new URLSearchParams({
+          id, status: newStatus, email: patientEmail, 
+          patient: patientName, date, time, doctor: doctorName
+        })
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        const statusSpan = e.target.closest("tr").querySelector(".status");
+        statusSpan.textContent = newStatus;
+        statusSpan.className = "status " + newStatus.toLowerCase().replace(/[^a-z0-9_-]/g,'');
+        alert("Appointment status updated successfully and email notification sent!");
+      } else {
+        alert("Update failed: " + (data.error || "Unknown error"));
       }
-    });
+    } catch (err) {
+      console.error(err);
+      alert("Unable to update status. Check console for details.");
+    }
+  }
+});
+
   </script>
 </body>
 </html>

@@ -1,138 +1,158 @@
 <?php
-// Show errors for debugging
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 include '../../backend/db_connect.php';
+require_once '../../backend/email_helper.php';
 session_start();
 
-// Check if logged in as patient
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'patient') {
   header('Location: ../../frontend/login.html');
   exit;
 }
 
-$patient_id = (int) $_SESSION['user_id'];
+$patient_id = (int)$_SESSION['user_id'];
 $message = '';
 
-// Fetch patient name/email for auto-fill (always run so form shows name on GET)
+// get patient info
 $patient_name = '';
 $patient_email = '';
-if ($stmt = $conn->prepare("SELECT full_name, email FROM patients WHERE id = ?")) {
-  $stmt->bind_param("i", $patient_id);
-  $stmt->execute();
-  $res = $stmt->get_result();
-  if ($row = $res->fetch_assoc()) {
-    $patient_name = $row['full_name'];
-    $patient_email = $row['email'];
-  }
-  $stmt->close();
+$stmt = $conn->prepare("SELECT full_name, email FROM patients WHERE id = ?");
+$stmt->bind_param("i", $patient_id);
+$stmt->execute();
+$res = $stmt->get_result();
+if ($row = $res->fetch_assoc()) {
+  $patient_name = $row['full_name'];
+  $patient_email = $row['email'];
 }
+$stmt->close();
 
-// Handle new appointment booking
+// book appointment
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['book_appointment'])) {
-  $doctor_id = (int) ($_POST['doctor_id'] ?? 0);
+  $doctor_id = (int)($_POST['doctor_id'] ?? 0);
   $date = trim($_POST['date'] ?? '');
   $time = trim($_POST['time'] ?? '');
-  $description = trim($_POST['description'] ?? '');
+  $desc = trim($_POST['description'] ?? '');
 
-  // basic validation
-  if ($doctor_id <= 0 || $date === '' || $time === '' || $description === '') {
-    $message = "Please fill in all required fields.";
-  } else {
-    // check doctor availability for the selected slot (ignore cancelled/rejected)
-    $chk = $conn->prepare("SELECT COUNT(*) AS cnt FROM appointments WHERE doctor_id = ? AND appointment_date = ? AND appointment_time = ? AND status NOT IN ('Cancelled','Rejected','cancelled','rejected')");
-    if ($chk) {
-      $chk->bind_param("iss", $doctor_id, $date, $time);
-      $chk->execute();
-      $res = $chk->get_result();
-      $busy = ($res->fetch_assoc()['cnt'] ?? 0) > 0;
-      $chk->close();
-    } else {
-      $message = "Availability check failed: " . $conn->error;
-      $busy = true;
+  if ($doctor_id && $date && $time && $desc) {
+    // lookup doctor name by id
+    $dname = '';
+    $dstmt = $conn->prepare("SELECT full_name, email FROM doctors WHERE id = ?");
+    if ($dstmt) {
+      $dstmt->bind_param("i", $doctor_id);
+      $dstmt->execute();
+      $dres = $dstmt->get_result();
+      if ($drow = $dres->fetch_assoc()) {
+        $dname = $drow['full_name'];
+        $doctor_email = $drow['email'];
+      }
+      $dstmt->close();
     }
 
-    if ($busy) {
-      $message = "Selected doctor is not available at that date/time. Please choose another slot.";
+    if ($dname === '') {
+      $message = "Selected doctor not found.";
     } else {
-        // Fetch doctor name from doctors table
-        $doctor_name = '';
-        if ($dstmt = $conn->prepare("SELECT full_name FROM doctors WHERE id = ?")) {
-            $dstmt->bind_param("i", $doctor_id);
-            $dstmt->execute();
-            $dres = $dstmt->get_result();
-            if ($drow = $dres->fetch_assoc()) {
-                $doctor_name = $drow['full_name'];
-            }
-            $dstmt->close();
-        }
+      // check slot availability
+      $chk = $conn->prepare("SELECT COUNT(*) AS cnt FROM appointments WHERE LOWER(TRIM(doctor_name)) = LOWER(TRIM(?)) AND appointment_date = ? AND appointment_time = ? AND LOWER(status) NOT IN ('cancelled','rejected')");
+      if ($chk) {
+        $chk->bind_param("sss", $dname, $date, $time);
+        $chk->execute();
+        $cres = $chk->get_result();
+        $busy = ($cres->fetch_assoc()['cnt'] ?? 0) > 0;
+        $chk->close();
+      } else {
+        $message = "Availability check failed: " . htmlspecialchars($conn->error);
+        $busy = true;
+      }
 
-        // Prepare INSERT with correct placeholders (9 placeholders) and status as a parameter
-        $stmt = $conn->prepare("INSERT INTO appointments (patient_id, doctor_id, patient_name, patient_email, doctor_name, appointment_date, appointment_time, description, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+      if ($busy) {
+        $message = "That time slot is already booked. Choose another.";
+      } else {
+        // insert new appointment
+        $status = 'Pending';
+        $stmt = $conn->prepare("INSERT INTO appointments (patient_name, patient_email, doctor_name, appointment_date, appointment_time, description, status) VALUES (?, ?, ?, ?, ?, ?, ?)");
         if ($stmt) {
-            $status = 'pending'; // use the same casing/value as stored in your DB
-            $stmt->bind_param("iisssssss", $patient_id, $doctor_id, $patient_name, $patient_email, $doctor_name, $date, $time, $description, $status);
-            if ($stmt->execute()) {
-                // success - redirect to avoid form resubmission
-                header("Location: patient-appointments.php?added=1");
-                exit;
-            } else {
-                $message = "Database error: " . $stmt->error;
+          $stmt->bind_param("sssssss", $patient_name, $patient_email, $dname, $date, $time, $desc, $status);
+          if ($stmt->execute()) {
+
+            // --- SEND EMAILS HERE ---
+            if (!empty($doctor_email)) {
+              $doctorMsg = "Dear Dr. $dname,\n\nYou have a new appointment with $patient_name on $date at $time.\n\nDescription: $desc\n\nHospital Management System";
+              sendEmail($doctor_email, "New Appointment Booked", $doctorMsg);
             }
-            $stmt->close();
+
+            $patientMsg = "Dear $patient_name,\n\nYour appointment with Dr. $dname on $date at $time has been successfully booked.\n\nWe will notify you once the doctor confirms.\n\nThank you,\nHospital Management System";
+            sendEmail($patient_email, "Appointment Confirmation", $patientMsg);
+
+            header("Location: patient-appointments.php?added=1");
+            exit;
+          } else {
+            $message = "Error saving appointment: " . htmlspecialchars($stmt->error);
+          }
+          $stmt->close();
         } else {
-            $message = "Prepare failed: " . $conn->error;
+          $message = "Prepare failed: " . htmlspecialchars($conn->error);
         }
+      }
     }
+  } else {
+    $message = "Please fill all fields.";
   }
 }
 
-// Handle cancellation
+// cancel appointment
 if (isset($_GET['cancel_id'])) {
-  $cancel_id = (int) $_GET['cancel_id'];
-  $stmt = $conn->prepare("UPDATE appointments SET status='Cancelled' WHERE id=? AND patient_id=?");
+  $id = (int)($_GET['cancel_id']);
+  $stmt = $conn->prepare("UPDATE appointments SET status = 'Cancelled' WHERE id = ? AND patient_email = ?");
   if ($stmt) {
-    $stmt->bind_param("ii", $cancel_id, $patient_id);
+    $stmt->bind_param("is", $id, $patient_email);
     $stmt->execute();
     $stmt->close();
-    $message = "Appointment cancelled successfully.";
+    $message = "Appointment cancelled.";
   } else {
-    $message = "Unable to cancel appointment: " . $conn->error;
+    $message = "Unable to cancel appointment: " . htmlspecialchars($conn->error);
   }
 }
 
-// Fetch all doctors for dropdown
+// fetch doctors
 $doctors = $conn->query("SELECT id, full_name, department FROM doctors");
 
-// Fetch all appointments for this patient (consistent column aliases used in the template)
+// fetch appointments
 $stmt = $conn->prepare("
-  SELECT a.id, d.full_name AS doctor_name, d.department AS specialty, a.appointment_date AS date, a.appointment_time AS time, a.status
+  SELECT a.id, a.doctor_name AS doctor_name, COALESCE(d.department, '') AS specialty, a.appointment_date AS date, a.appointment_time AS time, a.status
   FROM appointments a
-  INNER JOIN doctors d ON a.doctor_id = d.id
-  WHERE a.patient_id = ?
+  LEFT JOIN doctors d ON TRIM(d.full_name) = TRIM(a.doctor_name)
+  WHERE a.patient_email = ?
   ORDER BY a.appointment_date DESC, a.appointment_time DESC
 ");
-$appointments = [];
 if ($stmt) {
-  $stmt->bind_param("i", $patient_id);
+  $stmt->bind_param("s", $patient_email);
   $stmt->execute();
   $appointments = $stmt->get_result();
   $stmt->close();
+} else {
+  $appointments = $conn->query("SELECT id, doctor_name, appointment_date AS date, appointment_time AS time, status FROM appointments WHERE patient_email = '" . $conn->real_escape_string($patient_email) . "' ORDER BY appointment_date DESC, appointment_time DESC");
 }
+
+$conn->close();
 ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>My Appointments - HMS</title>
+  <title>My Appointments - Patient Panel</title>
   <link rel="stylesheet" href="css/patient-appointments.css">
+  <style>
+    .status.pending { color: orange; font-weight: bold; }
+    .status.accepted { color: green; font-weight: bold; }
+    .status.cancelled { color: gray; font-weight: bold; }
+    .status.finished { color: blue; font-weight: bold; }
+  </style>
 </head>
 <body>
   <div class="container">
-    <!-- Sidebar -->
     <aside class="sidebar">
       <h2>Patient Panel</h2>
       <ul>
@@ -144,74 +164,45 @@ if ($stmt) {
       </ul>
     </aside>
 
-    <!-- Main Content -->
     <main class="content">
-      <header class="topbar">
-        <h1>My Appointments</h1>
-      </header>
+      <header class="topbar"><h1>My Appointments</h1></header>
 
-      <?php if (!empty($message)): ?>
+      <?php if ($message): ?>
         <p class="message"><?= htmlspecialchars($message); ?></p>
       <?php endif; ?>
 
-      <!-- Appointment Booking Form -->
       <section class="book-appointment">
-        <h2>Book New Appointment</h2>
+        <h2>Book Appointment</h2>
         <form method="POST">
-          <div class="form-group">
-            <label>Your Name:</label>
-            <input type="text" name="patient_name_display" value="<?= htmlspecialchars($patient_name); ?>" readonly />
-            <input type="hidden" name="patient_name" value="<?= htmlspecialchars($patient_name); ?>" />
-            <input type="hidden" name="patient_email" value="<?= htmlspecialchars($patient_email); ?>" />
-          </div>
-
+          <input type="hidden" name="book_appointment" value="1">
           <div class="form-group">
             <label>Choose Doctor:</label>
             <select name="doctor_id" required>
               <option value="">-- Select Doctor --</option>
-              <?php if ($doctors): while ($d = $doctors->fetch_assoc()): ?>
-                <option value="<?= (int)$d['id']; ?>">
-                  <?= htmlspecialchars($d['full_name']); ?> (<?= htmlspecialchars($d['department']); ?>)
-                </option>
-              <?php endwhile; endif; ?>
+              <?php while ($d = $doctors->fetch_assoc()): ?>
+                <option value="<?= $d['id']; ?>"><?= htmlspecialchars($d['full_name']) ?> (<?= htmlspecialchars($d['department']); ?>)</option>
+              <?php endwhile; ?>
             </select>
           </div>
 
-          <div class="form-group">
-            <label>Select Date:</label>
-            <input type="date" name="date" required min="<?= date('Y-m-d'); ?>">
-          </div>
+          <div class="form-group"><label>Date:</label><input type="date" name="date" min="<?= date('Y-m-d'); ?>" required></div>
+          <div class="form-group"><label>Time:</label><input type="time" name="time" required></div>
+          <div class="form-group"><label>Description:</label><input type="text" name="description" required></div>
 
-          <div class="form-group">
-            <label>Select Time:</label>
-            <input type="time" name="time" required>
-          </div>
-
-          <div class="form-group">
-            <label>Description:</label>
-            <input type="text" name="description" required>
-          </div>
-
-          <button type="submit" name="book_appointment">Book Appointment</button>
+          <button type="submit">Book Appointment</button>
         </form>
       </section>
 
-      <!-- Appointment List -->
       <section class="appointments">
-        <h2>My Appointment History</h2>
+        <h2>Appointment History</h2>
         <table>
           <thead>
             <tr>
-              <th>Doctor</th>
-              <th>Specialty</th>
-              <th>Date</th>
-              <th>Time</th>
-              <th>Status</th>
-              <th>Action</th>
+              <th>Doctor</th><th>Specialty</th><th>Date</th><th>Time</th><th>Status</th><th>Action</th>
             </tr>
           </thead>
           <tbody>
-            <?php if ($appointments && $appointments->num_rows > 0): ?>
+            <?php if ($appointments->num_rows > 0): ?>
               <?php while ($a = $appointments->fetch_assoc()): ?>
                 <tr>
                   <td><?= htmlspecialchars($a['doctor_name']); ?></td>
@@ -220,8 +211,8 @@ if ($stmt) {
                   <td><?= htmlspecialchars($a['time']); ?></td>
                   <td><span class="status <?= strtolower($a['status']); ?>"><?= htmlspecialchars($a['status']); ?></span></td>
                   <td>
-                    <?php if (strcasecmp($a['status'], 'Pending') === 0 || strcasecmp($a['status'], 'pending') === 0): ?>
-                      <a href="?cancel_id=<?= (int)$a['id']; ?>" class="cancel">Cancel</a>
+                    <?php if (strcasecmp($a['status'], 'Pending') === 0): ?>
+                      <a href="?cancel_id=<?= $a['id']; ?>" class="cancel">Cancel</a>
                     <?php else: ?>
                       <span class="disabled">N/A</span>
                     <?php endif; ?>
@@ -229,7 +220,7 @@ if ($stmt) {
                 </tr>
               <?php endwhile; ?>
             <?php else: ?>
-              <tr><td colspan="6" class="no-data">No appointments found.</td></tr>
+              <tr><td colspan="6" style="text-align:center;">No appointments found.</td></tr>
             <?php endif; ?>
           </tbody>
         </table>

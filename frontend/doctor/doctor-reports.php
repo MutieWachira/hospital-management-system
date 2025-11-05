@@ -4,33 +4,69 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 include '../../backend/db_connect.php';
+require_once '../../backend/email_helper.php';
+
+session_start();
 
 // Require doctor login
-session_start();
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'doctor') {
   header('Location: ../../frontend/login.html');
   exit;
 }
 
+$doctor_id = (int) $_SESSION['user_id'];
+$doctor_name = $_SESSION['name'] ?? 'Doctor';
+
+// ==============================
 // Fetch reports with patient details
+// ==============================
 $query = "
   SELECT 
-    doctor_reports.id AS report_id,
-    patients.full_name AS patient_name,
-    doctor_reports.diagnosis AS diagnosis,
-    doctor_reports.treatment AS treatment,
-    doctor_reports.report_date AS report_date
-  FROM doctor_reports
-  INNER JOIN patients ON doctor_reports.patient_id = patients.id
-  ORDER BY doctor_reports.report_date DESC
+    dr.id AS report_id,
+    p.id AS patient_id,
+    p.full_name AS patient_name,
+    p.email AS patient_email,
+    dr.diagnosis AS diagnosis,
+    dr.treatment AS treatment,
+    dr.report_date AS report_date
+  FROM doctor_reports dr
+  INNER JOIN patients p ON dr.patient_id = p.id
+  WHERE dr.doctor_id = ?
+  ORDER BY dr.report_date DESC
 ";
-$result = mysqli_query($conn, $query);
 
-if (!$result) {
-  die('Database query failed: ' . mysqli_error($conn));
+$stmt = $conn->prepare($query);
+if (!$stmt) {
+  die("Prepare failed: " . htmlspecialchars($conn->error));
 }
-?>
+$stmt->bind_param("i", $doctor_id);
+$stmt->execute();
+$result = $stmt->get_result();
 
+// ==============================
+// Optional: Send notification email when new reports are added
+// (Only triggered if a `new_report` GET parameter is present, so it doesn’t spam every page load)
+// ==============================
+if (isset($_GET['new_report']) && isset($_GET['pid'])) {
+  $patient_id = (int) $_GET['pid'];
+  $emailQ = $conn->prepare("SELECT email, full_name FROM patients WHERE id = ?");
+  $emailQ->bind_param("i", $patient_id);
+  $emailQ->execute();
+  $pData = $emailQ->get_result()->fetch_assoc();
+  $emailQ->close();
+
+  if ($pData && !empty($pData['email'])) {
+    $patient_email = $pData['email'];
+    $patient_name = $pData['full_name'];
+    $subject = "New Medical Report Added";
+    $message = "Dear $patient_name,\n\nA new report has been added by Dr. $doctor_name.\nPlease log in to your account to view the full details.\n\nKind regards,\nHMS Team";
+    sendEmail($patient_email, $subject, $message);
+  }
+}
+
+$stmt->close();
+$conn->close();
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -78,8 +114,8 @@ if (!$result) {
           </tr>
         </thead>
         <tbody>
-          <?php if (mysqli_num_rows($result) > 0): ?>
-            <?php while ($row = mysqli_fetch_assoc($result)): ?>
+          <?php if ($result->num_rows > 0): ?>
+            <?php while ($row = $result->fetch_assoc()): ?>
               <tr>
                 <td><?= htmlspecialchars($row['report_id']); ?></td>
                 <td><?= htmlspecialchars($row['patient_name']); ?></td>
@@ -101,20 +137,18 @@ if (!$result) {
     function filterReports() {
       const searchValue = document.getElementById("searchInput").value.toLowerCase();
       const filterDate = document.getElementById("filterDate").value;
-      const table = document.getElementById("reportsTable");
-      const rows = table.getElementsByTagName("tr");
+      const rows = document.querySelectorAll("#reportsTable tbody tr");
 
-      for (let i = 1; i < rows.length; i++) {
-        const name = rows[i].getElementsByTagName("td")[1]?.innerText.toLowerCase() || "";
-        const date = rows[i].getElementsByTagName("td")[4]?.innerText || "";
+      rows.forEach(row => {
+        const name = (row.children[1]?.innerText || "").toLowerCase();
+        const date = row.children[4]?.innerText || "";
         const matchName = name.includes(searchValue);
         const matchDate = !filterDate || date === filterDate;
-
-        rows[i].style.display = (matchName && matchDate) ? "" : "none";
-      }
+        row.style.display = (matchName && matchDate) ? "" : "none";
+      });
     }
 
-    //  Print Reports
+    // 🖨️ Print Reports
     function printReports() {
       const printContent = document.querySelector(".reports-section").innerHTML;
       const printWindow = window.open('', '', 'width=900,height=700');

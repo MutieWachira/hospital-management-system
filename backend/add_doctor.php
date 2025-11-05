@@ -4,6 +4,8 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 include 'db_connect.php';
+require_once 'email_helper.php';
+
 
 // Check if form was submitted
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -71,8 +73,32 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if ($stmt->execute()) {
         $stmt->close();
-        echo "<script>alert('Doctor added successfully!'); window.location='../frontend/admin/doctor.php';</script>";
-        exit;
+         // ✉️ Email notification to the doctor
+    $subject = "Welcome to Hospital Management System (HMS)";
+    $message = "
+    Dear Dr. $full_name,
+
+    Your doctor account has been successfully created on the Hospital Management System.
+
+    You can now log in using your registered email:
+    Email: $email
+    Temporary Password: $password
+    
+    Please keep your password confidential and change it after your first login.
+
+    Regards,
+    HMS Administration Team
+    ";
+
+    sendEmail($email, $subject, $message);
+
+    // (Optional) ✉️ Notify admin as well
+    $adminEmail = "admin@hospital.com"; // replace with your actual admin email
+    $adminMessage = "A new doctor account has been created.\n\nDoctor: $full_name\nEmail: $email\nDepartment: $department";
+    sendEmail($adminEmail, "New Doctor Added - HMS", $adminMessage);
+
+    echo "<script>alert('Doctor added successfully and email sent!'); window.location='../frontend/admin/doctor.php';</script>";
+    exit;
     } else {
         $err = addslashes($stmt->error);
         $stmt->close();

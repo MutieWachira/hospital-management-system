@@ -23,7 +23,6 @@ body {
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
   box-shadow: 2px 0 6px rgba(0, 0, 0, 0.1);
 }
 
@@ -162,7 +161,8 @@ tr:hover {
   color: orange;
 }
 
-.status.ongoing {
+.status.ongoing,
+.status.accepted {
   background: rgba(30, 144, 255, 0.1);
   color: #1b88ee;
 }
