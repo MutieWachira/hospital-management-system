@@ -6,7 +6,7 @@ error_reporting(E_ALL);
 session_start();
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-  header("Location: /../frontend/login.html");
+    header("Location: ../login.html");
   exit;
 }
 
@@ -70,6 +70,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     if ($stmt->execute()) {
+        $stmt->close();
+
+        // send notification email to patient
+        require_once '../../backend/email_helper.php';
+        $to = $patient['email'] ?? '';
+        if ($to) {
+            $subject = "Your HMS profile was updated";
+            $body = "Hello " . ($patient['full_name'] ?? '') . ",\n\n"
+                  . "Your patient profile was updated on " . date('Y-m-d H:i:s') . ".\n"
+                  . "If you did not request this change, please contact the hospital immediately.\n\n"
+                  . "Regards,\nHospital Management System";
+            if (!sendEmail($to, $subject, $body)) {
+                error_log("Failed to send patient update email to {$to}");
+            }
+        }
+
         echo "<script>alert('Patient updated successfully!'); window.location='patients.php';</script>";
     } else {
         echo "<p>Error updating patient: " . $stmt->error . "</p>";

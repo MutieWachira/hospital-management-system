@@ -6,7 +6,7 @@ include '../../backend/db_connect.php';
 session_start();
 
 if (!isset($_SESSION['user_id']) || ($_SESSION['role'] ?? '') !== 'admin') {
-  // use a relative redirect from frontend/admin to frontend/login.html
+  // fixed: use a proper relative redirect from frontend/admin to frontend/login.html
   header("Location: ../login.html");
   exit();
 }
@@ -53,25 +53,26 @@ if ($hasDoctorId) {
     error_log("Doctor workload query failed: " . $conn->error);
   }
 } else {
-  // appointments table only stores doctor_name — count by matching full_name
-  $docRes = $conn->query("SELECT full_name FROM doctors");
-  if ($docRes) {
-    while ($doc = $docRes->fetch_assoc()) {
-      $dname = $doc['full_name'];
-      $cstmt = $conn->prepare("SELECT COUNT(*) AS cnt FROM appointments WHERE doctor_name = ?");
-      if ($cstmt) {
-        $cstmt->bind_param("s", $dname);
-        $cstmt->execute();
-        $cres = $cstmt->get_result()->fetch_assoc();
-        $count = (int)($cres['cnt'] ?? 0);
-        $cstmt->close();
-      } else {
-        $count = 0;
-      }
-      $doctorWorkload[] = ['doctor_name' => $dname, 'total_appointments' => $count];
+  // single aggregated query (better than per-doctor loop)
+  $result = $conn->query("
+    SELECT d.full_name AS doctor_name, COALESCE(a_tot.total, 0) AS total_appointments
+    FROM doctors d
+    LEFT JOIN (
+      SELECT doctor_name, COUNT(*) AS total
+      FROM appointments
+      GROUP BY doctor_name
+    ) a_tot ON a_tot.doctor_name = d.full_name
+    ORDER BY total_appointments DESC
+  ");
+  if ($result) {
+    while ($row = $result->fetch_assoc()) {
+      $doctorWorkload[] = [
+        'doctor_name' => $row['doctor_name'] ?? '—',
+        'total_appointments' => (int)($row['total_appointments'] ?? 0)
+      ];
     }
   } else {
-    // fallback: group by doctor_name from appointments table
+    // fallback: group directly from appointments if doctors table missing/empty
     $gres = $conn->query("SELECT doctor_name, COUNT(*) AS total FROM appointments GROUP BY doctor_name ORDER BY total DESC");
     if ($gres) {
       while ($row = $gres->fetch_assoc()) {

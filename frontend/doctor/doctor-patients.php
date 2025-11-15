@@ -10,7 +10,7 @@ include '../../backend/db_connect.php';
 
 // Restrict access to doctors only
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'doctor') {
-  header("Location: ../login.php");
+  header("Location: ../login.html");
   exit;
 }
 

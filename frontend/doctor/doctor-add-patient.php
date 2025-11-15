@@ -7,7 +7,7 @@ error_reporting(E_ALL);
 session_start();
 // Require doctor login
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'doctor') {
-    header('Location: ../../frontend/login.html');
+    header("Location: ../login.html");
     exit;
 }
 

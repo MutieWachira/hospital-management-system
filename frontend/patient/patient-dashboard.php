@@ -10,7 +10,7 @@ include '../../backend/db_connect.php';
 // Start session and check if patient is logged in
 session_start();
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'patient') {
-  header('Location: ../../frontend/login.html');
+  header("Location: ../login.html");
   exit;
 }
 
