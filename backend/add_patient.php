@@ -7,7 +7,7 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 include 'db_connect.php';
-require_once 'email_helper.php'; // ✅ Include email helper
+require_once 'email_helper.php'; //  Include email helper
 
 // Check if form was submitted
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -20,15 +20,35 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $phone = $_POST['phone'];
     $address = $_POST['address'];
     $doctor = $_POST['doctor'];
-    $password = $_POST['password'] ?? '';
-    $confirm_password = $_POST['confirm_password'] ?? '';
+    // admin may leave password empty -> default to first name
+    $password = trim($_POST['password'] ?? '');
+    $confirm_password = trim($_POST['confirm_password'] ?? '');
 
-    // Validate required fields
+    // derive a safe first-name fallback (alphanumeric, lowercased)
+    $firstName = 'patient' . rand(100,999);
+    if ($full_name !== '') {
+        $parts = preg_split('/\s+/', $full_name);
+        $fn = $parts[0] ?? $full_name;
+        $fn = preg_replace('/[^A-Za-z0-9]/', '', $fn);
+        if ($fn !== '') {
+            $firstName = strtolower($fn);
+        }
+    }
+
+    // if admin did not enter a password, use the derived first name as temporary password
+    if ($password === '') {
+        $password = $firstName;
+        $confirm_password = $password;
+        $usingDefaultPassword = true;
+    } else {
+        $usingDefaultPassword = false;
+    }
+
+    // Validate required fields (password/confirm now ensured)
     if (
-        empty($full_name) || empty($email) || empty($date_of_birth) || 
-        empty($gender) || empty($blood_group) || empty($phone) || 
-        empty($address) || empty($doctor) || empty($password) || 
-        empty($confirm_password)
+        empty($full_name) || empty($email) || empty($date_of_birth) ||
+        empty($gender) || empty($blood_group) || empty($phone) ||
+        empty($address) || empty($doctor) || empty($password) || empty($confirm_password)
     ) {
         echo "<script>alert('All fields are required!'); window.history.back();</script>";
         exit;
@@ -75,9 +95,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         You can now log in using your registered email:
         Email: $email
         Password: $password
-        
-        Please remember to keep your password secure and update your password after logging in.
 
+        For security, please change this temporary password after your first login.
+        
         Regards,
         HMS Administration Team
         ";

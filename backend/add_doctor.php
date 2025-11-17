@@ -12,14 +12,33 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Collect form data
     $full_name = trim($_POST['full_name']);
     $email = trim($_POST['email']);
-    $password = $_POST['password'];
-    $confirm_password = $_POST['confirm_password'];
+    $password = trim($_POST['password'] ?? '');
+    $confirm_password = trim($_POST['confirm_password'] ?? '');
     $date_of_birth = $_POST['date_of_birth'];
     $gender = $_POST['gender'];
     $department = $_POST['department'];
     $phone = $_POST['phone'];
     $address = $_POST['address'];
     $status = $_POST['status'];
+
+    // If admin did not enter a password, default to doctor's first name (sanitized)
+    if ($password === '') {
+        $firstName = 'doctor' . rand(100,999);
+        if ($full_name !== '') {
+            $parts = preg_split('/\s+/', $full_name);
+            $fn = $parts[0] ?? $full_name;
+            // keep only alphanumeric characters for default password
+            $fn = preg_replace('/[^A-Za-z0-9]/', '', $fn);
+            if ($fn !== '') {
+                $firstName = $fn;
+            }
+        }
+        $password = $firstName;
+        $confirm_password = $password;
+        $usingDefaultPassword = true;
+    } else {
+        $usingDefaultPassword = false;
+    }
 
     //  Validate required fields
     if (

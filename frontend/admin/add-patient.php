@@ -88,7 +88,26 @@ $conn->close();
 
           <div class="form-group">
             <label for="bloodGroup">Blood Group:</label>
-            <input type="text" name="blood_group" id="bloodGroup" placeholder="e.g. O+" required />
+
+            <!-- select + hidden value -> backend receives 'blood_group' -->
+            <select id="bloodGroupSelect" required>
+              <option value="">Select blood group</option>
+              <option value="A+">A+</option>
+              <option value="A-">A-</option>
+              <option value="B+">B+</option>
+              <option value="B-">B-</option>
+              <option value="AB+">AB+</option>
+              <option value="AB-">AB-</option>
+              <option value="O+">O+</option>
+              <option value="O-">O-</option>
+              <option value="Other">Other</option>
+            </select>
+
+            <!-- hidden input actually submitted -->
+            <input type="hidden" id="bloodGroupInput" name="blood_group" />
+
+            <!-- visible only when "Other" selected -->
+            <input type="text" id="bloodGroupOther" placeholder="Specify blood group (e.g. Apos)" style="display:none;margin-top:8px;" />
           </div>
 
           <div class="form-group">
@@ -116,12 +135,12 @@ $conn->close();
           <!-- 🔒 Password Fields -->
           <div class="form-group">
             <label for="password">Password:</label>
-            <input type="password" id="password" name="password" placeholder="Enter password" required />
+            <input type="password" id="password" name="password" placeholder="Enter password"/>
           </div>
 
           <div class="form-group">
             <label for="confirmPassword">Confirm Password:</label>
-            <input type="password" id="confirmPassword" name="confirm_password" placeholder="Re-enter password" required />
+            <input type="password" id="confirmPassword" name="confirm_password" placeholder="Re-enter password"/>
           </div>
 
           <button type="submit" class="submit-btn" name="submit">Save Patient</button>
@@ -129,5 +148,32 @@ $conn->close();
       </section>
     </main>
   </div>
+
+  <script>
+    (function(){
+      const sel = document.getElementById('bloodGroupSelect');
+      const other = document.getElementById('bloodGroupOther');
+      const hidden = document.getElementById('bloodGroupInput');
+
+      function sync() {
+        const v = sel.value;
+        if (v === 'Other') {
+          other.style.display = 'block';
+          other.required = true;
+          hidden.value = other.value.trim();
+        } else {
+          other.style.display = 'none';
+          other.required = false;
+          hidden.value = v;
+        }
+      }
+
+      sel.addEventListener('change', sync);
+      other.addEventListener('input', () => { hidden.value = other.value.trim(); });
+
+      // initialize on load
+      document.addEventListener('DOMContentLoaded', sync);
+    })();
+  </script>
 </body>
 </html>

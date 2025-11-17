@@ -49,7 +49,8 @@ Your appointment with Dr. $doctorName on $appointmentDate at $appointmentTime ha
 
 New Status: $status
 
-Please log in to your Hospital Management System account to view details.
+Please log in to your Hospital Management System account to view details and remember to carry your identification and any necessary documents.
+Get Well Soon!
 
 Best regards,
 HMS Team

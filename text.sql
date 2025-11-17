@@ -70,18 +70,20 @@ CREATE TABLE appointments (
     appointment_time TIME,
     description VARCHAR(255),
     status VARCHAR(100) NOT NULL,
+    reminder_sent TINYINT(1) NOT NULL DEFAULT 0,
+    reminder_sent_at DATETIME NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- values for appointment table
-INSERT INTO appointments (patient_name, patient_email, doctor_name, description, appointment_date, appointment_time, status)
+INSERT INTO appointments (patient_name, patient_email, doctor_name, description, appointment_date, appointment_time, reminder_sent, reminder_sent_at, status)
 VALUES
-('Alice Williams', 'alice.williams@example.com', 'Dr. John Smith', 'Regular check-up', '2023-09-15', '10:00:00', 'pending'),
-('Bob Johnson', 'bob.johnson@example.com', 'Dr. Emily Johnson', 'Follow-up visit', '2023-09-16', '11:00:00', 'pending'),
-('Charlie Brown', 'charlie.brown@example.com', 'Dr. Michael Brown', 'Consultation', '2023-09-17', '12:00:00', 'pending'),
-('David Wilson', 'david.wilson@example.com', 'Dr. Sarah Lee', 'Routine check', '2023-09-18', '09:30:00', 'pending'),
-('Eva Martinez', 'eva.martinez@example.com', 'Dr. John Smith', 'Flu symptoms', '2023-09-19', '14:00:00', 'pending'),
-('Frank Thomas', 'frank.thomas@example.com', 'Dr. Emily Johnson', 'Back pain', '2023-09-20', '15:30:00', 'pending');
+('Alice Williams', 'alice.williams@example.com', 'Dr. John Smith', 'Regular check-up', '2023-09-15', '10:00:00', 0, NULL, 'pending'),
+('Bob Johnson', 'bob.johnson@example.com', 'Dr. Emily Johnson', 'Follow-up visit', '2023-09-16', '11:00:00', 0, NULL, 'pending'),
+('Charlie Brown', 'charlie.brown@example.com', 'Dr. Michael Brown', 'Consultation', '2023-09-17', '12:00:00', 0, NULL, 'pending'),
+('David Wilson', 'david.wilson@example.com', 'Dr. Sarah Lee', 'Routine check', '2023-09-18', '09:30:00', 0, NULL, 'pending'),
+('Eva Martinez', 'eva.martinez@example.com', 'Dr. John Smith', 'Flu symptoms', '2023-09-19', '14:00:00', 0, NULL, 'pending'),
+('Frank Thomas', 'frank.thomas@example.com', 'Dr. Emily Johnson', 'Back pain', '2023-09-20', '15:30:00', 0, NULL, 'pending');
 
 --medical records table
 CREATE TABLE medical_records (
@@ -116,6 +118,7 @@ VALUES
 CREATE TABLE prescriptions (
   id INT AUTO_INCREMENT PRIMARY KEY,
   patient_id INT,
+  doctor_id INT,
   patient_name VARCHAR(100),
   doctor_name VARCHAR(100),
   drug_name VARCHAR(255),
